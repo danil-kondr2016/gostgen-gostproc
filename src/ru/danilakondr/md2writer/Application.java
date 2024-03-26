@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.Exception;
 import java.lang.RuntimeException;
+import java.nio.file.Path;
 
 import static com.sun.star.text.ControlCharacter.PARAGRAPH_BREAK;
 
@@ -50,7 +51,8 @@ public class Application {
 			throw new RuntimeException("Cannot open file " + f);
 		}
 
-		this.docURL = "file:///" + f.getAbsolutePath();
+		Path p = f.toPath();
+		this.docURL = p.toUri().toString();
 	}
 	
 	private void bootstrap() throws java.lang.Exception {

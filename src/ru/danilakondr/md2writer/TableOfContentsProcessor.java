@@ -1,39 +1,42 @@
 package ru.danilakondr.md2writer;
 
+import com.sun.star.awt.CharSet;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.*;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
+import com.sun.star.uno.XInterface;
 import com.sun.star.util.XSearchDescriptor;
 import com.sun.star.util.XSearchable;
 
+import java.nio.charset.StandardCharsets;
+
 public class TableOfContentsProcessor {
     private final XTextDocument xDoc;
+    private final XText xText;
+    private final XParagraphCursor xCursor;
 
     public TableOfContentsProcessor(XTextDocument xDoc) {
         this.xDoc = xDoc;
+        this.xText = xDoc.getText();
+        XTextCursor xTextCursor = this.xText.createTextCursorByRange(this.xText.getStart());
+        this.xCursor = UnoRuntime.queryInterface(XParagraphCursor.class, xTextCursor);
     }
 
     public void process() throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
 
-        xSD.setPropertyValue("SearchString", "^([ \\t]*)%TOC%$");
-        xSD.setPropertyValue("SearchCaseSensitive", true);
-        xSD.setPropertyValue("SearchWords", true);
+        xSD.setSearchString("^([ \\t]*)%TOC%$");
         xSD.setPropertyValue("SearchRegularExpression", true);
 
-        XIndexAccess xResults = xS.findAll(xSD);
-        XText xText = xDoc.getText();
-        XSimpleText xSText = UnoRuntime
-                .queryInterface(XSimpleText.class, xText);
-        for (int i = 0; i < xResults.getCount(); i++) {
-            XTextCursor cur = UnoRuntime
-                    .queryInterface(XTextCursor.class, xResults.getByIndex(i));
-            putTableOfContents(cur);
-        }
+        Object oResult = xS.findFirst(xSD);
+        XTextRange xRange = UnoRuntime.queryInterface(XTextRange.class, oResult);
+        xCursor.gotoRange(xRange.getStart(), false);
+        xCursor.gotoRange(xRange.getEnd(), true);
+        putTableOfContents(xCursor);
     }
 
     private Object createIndex() throws Exception {
@@ -53,12 +56,13 @@ public class TableOfContentsProcessor {
 
         XText xText = xDoc.getText();
 
-        // TODO implement removing %TOC% in the cursor position
         xText.insertTextContent(cursor, xIndex, true);
 
         // Сначала добавить и только потом выставлять свойства!
         xIndexProp.setPropertyValue("CreateFromOutline", true);
+        // TODO fix encoding issues
         xIndexProp.setPropertyValue("Title", "Оглавление");
+
         xIndex.update();
     }
 }
