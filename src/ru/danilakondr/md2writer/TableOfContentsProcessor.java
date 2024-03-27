@@ -28,6 +28,9 @@ public class TableOfContentsProcessor {
         xSD.setPropertyValue("SearchRegularExpression", true);
 
         Object oResult = xS.findFirst(xSD);
+        if (oResult == null)
+            return;
+
         XTextRange xRange = UnoRuntime.queryInterface(XTextRange.class, oResult);
         xCursor.gotoRange(xRange.getStart(), false);
         xCursor.gotoRange(xRange.getEnd(), true);
