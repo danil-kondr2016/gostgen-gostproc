@@ -1,4 +1,4 @@
-package ru.danilakondr.md2writer;
+package ru.danilakondr.gostproc;
 
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameAccess;

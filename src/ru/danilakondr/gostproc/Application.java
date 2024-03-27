@@ -1,4 +1,4 @@
-package ru.danilakondr.md2writer;
+package ru.danilakondr.gostproc;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.text.*;

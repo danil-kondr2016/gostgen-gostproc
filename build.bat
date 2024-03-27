@@ -103,6 +103,6 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo Creating postproc.bat
-echo @java -cp "%CLASSPATH%;postproc.jar" ru.danilakondr.md2writer.Application %%* > postproc.bat
+echo @java -cp "%CLASSPATH%;postproc.jar" ru.danilakondr.gostproc.Application %%* > postproc.bat
 
 echo Building process has been finished successfully.

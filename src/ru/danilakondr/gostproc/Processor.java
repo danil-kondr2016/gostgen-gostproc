@@ -1,4 +1,4 @@
-package ru.danilakondr.md2writer;
+package ru.danilakondr.gostproc;
 
 public interface Processor {
     public void process() throws Exception;
