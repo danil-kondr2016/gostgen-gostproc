@@ -31,6 +31,8 @@ public class Application {
 		}
 		catch (Exception e) {
 			System.err.println(e.getMessage());
+		}
+		finally {
 			app.terminate();
 		}
 	}
@@ -79,24 +81,20 @@ public class Application {
 		xDoc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
 	}
 
-	private void closeDocument() {
-		try {
-			XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
-			xStorable.store();
-		}
-		catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-
-		xDesktop.terminate();
+	private void closeDocument() throws Exception {
+		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
+		xStorable.store();
 	}
 
 	public void terminate() {
-		if (success) {
-			this.closeDocument();
+		if (this.success) {
+			try {
+				this.closeDocument();
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+			}
 		}
-		else {
-			xDesktop.terminate();
-		}
+
+		xDesktop.terminate();
 	}
 }
