@@ -17,6 +17,7 @@ public class Application {
 	private String docURL;
     private XDesktop xDesktop;
 	private XTextDocument xDoc;
+	private boolean success = false;
 	
 	public Application(String docPath) {
 		this.docPath = docPath;
@@ -30,6 +31,7 @@ public class Application {
 		}
 		catch (Exception e) {
 			System.err.println(e.getMessage());
+			app.terminate();
 		}
 	}
 
@@ -39,6 +41,8 @@ public class Application {
 
 		new TableOfContentsProcessor(xDoc).process();
 		new MathFormulaProcessor(xDoc).process();
+
+		this.success = true;
 		this.closeDocument();
 	}
 
@@ -75,10 +79,24 @@ public class Application {
 		xDoc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
 	}
 
-	private void closeDocument() throws Exception {
-		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
-		xStorable.store();
+	private void closeDocument() {
+		try {
+			XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
+			xStorable.store();
+		}
+		catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 
 		xDesktop.terminate();
+	}
+
+	public void terminate() {
+		if (success) {
+			this.closeDocument();
+		}
+		else {
+			xDesktop.terminate();
+		}
 	}
 }
