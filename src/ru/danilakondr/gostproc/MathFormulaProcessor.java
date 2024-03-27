@@ -9,13 +9,12 @@ import com.sun.star.uno.UnoRuntime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MathFormulaProcessor implements Processor {
+public class MathFormulaProcessor extends Processor {
     public static final String MATH_FORMULA_GUID = "078B7ABA-54FC-457F-8551-6147e776a997";
-    private final XTextDocument xDoc;
     private final Pattern left, right;
 
     public MathFormulaProcessor(XTextDocument xDoc) {
-        this.xDoc = xDoc;
+        super(xDoc);
 
         left = Pattern.compile("#\\s*([*/&|=<>]|cdot|times|div)");
         right = Pattern.compile("([\\\\+\\-/&|=<>]|cdot|times|div|plusminus|minusplus)\\s*#");

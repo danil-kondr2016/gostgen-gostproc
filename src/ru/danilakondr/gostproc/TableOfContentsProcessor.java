@@ -8,13 +8,13 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XSearchDescriptor;
 import com.sun.star.util.XSearchable;
 
-public class TableOfContentsProcessor implements Processor {
-    private final XTextDocument xDoc;
+public class TableOfContentsProcessor extends Processor {
     private final XText xText;
     private final XParagraphCursor xCursor;
 
     public TableOfContentsProcessor(XTextDocument xDoc) {
-        this.xDoc = xDoc;
+        super(xDoc);
+
         this.xText = xDoc.getText();
         XTextCursor xTextCursor = this.xText.createTextCursorByRange(this.xText.getStart());
         this.xCursor = UnoRuntime.queryInterface(XParagraphCursor.class, xTextCursor);
@@ -52,8 +52,6 @@ public class TableOfContentsProcessor implements Processor {
                 .queryInterface(XDocumentIndex.class, oIndex);
         XPropertySet xIndexProp = UnoRuntime
                 .queryInterface(XPropertySet.class, xIndex);
-
-        XText xText = xDoc.getText();
 
         xText.insertTextContent(cursor, xIndex, true);
 

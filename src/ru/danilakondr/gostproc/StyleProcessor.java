@@ -14,12 +14,11 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
-public class StyleProcessor implements Processor {
-    private final XTextDocument xDoc;
+public class StyleProcessor extends Processor {
     private final XNameAccess xStyleFamilies;
 
     public StyleProcessor(XTextDocument xDoc) {
-        this.xDoc = xDoc;
+        super(xDoc);
 
         XStyleFamiliesSupplier xStyleSup = UnoRuntime.queryInterface(
                 XStyleFamiliesSupplier.class,
