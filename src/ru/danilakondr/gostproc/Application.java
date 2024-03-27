@@ -71,61 +71,9 @@ public class Application {
 			Path p = f.toPath();
 			this.docURL = p.toUri().toString();
 		}
-		else {
-			System.err.println("Trying to select a file");
-			pickFile();
-		}
 
 		if (docURL == null)
 			throw new RuntimeException("File has not been specified");
-	}
-
-	private void pickFile() throws Exception {
-		XComponent xComponent = null;
-
-		try {
-			Object oFilePicker = xMCF
-					.createInstanceWithContext(
-							"com.sun.star.ui.dialogs.FilePicker",
-							xContext
-					);
-			XFilePicker xFilePicker = UnoRuntime.queryInterface(
-					XFilePicker.class,
-					oFilePicker
-			);
-
-			XFilterManager xFilterManager = UnoRuntime.queryInterface(XFilterManager.class, xFilePicker);
-			xFilterManager.appendFilter("OpenDocument Text", "*.odt");
-			xFilterManager.appendFilter("Microsoft Word 2007", "*.docx");
-			xFilterManager.appendFilter("Microsoft Word 2003", "*.doc");
-			xFilterManager.appendFilter("Rich Text Format", "*.rtf");
-			xFilterManager.appendFilter("Any files", "*.*");
-
-			XInitialization xInit = UnoRuntime
-					.queryInterface(XInitialization.class, xFilePicker);
-			Short[] listAny = new Short[]{TemplateDescription.FILEOPEN_SIMPLE};
-			xInit.initialize(listAny);
-
-			xComponent = UnoRuntime.queryInterface(XComponent.class, xFilePicker);
-
-			XExecutableDialog xDialog = UnoRuntime
-					.queryInterface(XExecutableDialog.class, xFilePicker);
-			short nResult = xDialog.execute();
-
-			if (nResult == ExecutableDialogResults.OK) {
-				String[] sPathList = xFilePicker.getFiles();
-				if (sPathList.length > 0) {
-					docURL = sPathList[0];
-				}
-			}
-		}
-		catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-		finally {
-			if (xComponent != null)
-				xComponent.dispose();
-		}
 	}
 
 	private void bootstrap() throws java.lang.Exception {
