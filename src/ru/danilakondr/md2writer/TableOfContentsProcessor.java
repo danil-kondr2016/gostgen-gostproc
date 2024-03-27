@@ -1,17 +1,12 @@
 package ru.danilakondr.md2writer;
 
-import com.sun.star.awt.CharSet;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.XIndexAccess;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.*;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
-import com.sun.star.uno.XInterface;
 import com.sun.star.util.XSearchDescriptor;
 import com.sun.star.util.XSearchable;
-
-import java.nio.charset.StandardCharsets;
 
 public class TableOfContentsProcessor {
     private final XTextDocument xDoc;
@@ -60,7 +55,6 @@ public class TableOfContentsProcessor {
 
         // Сначала добавить и только потом выставлять свойства!
         xIndexProp.setPropertyValue("CreateFromOutline", true);
-        // TODO fix encoding issues
         xIndexProp.setPropertyValue("Title", "Оглавление");
 
         xIndex.update();

@@ -1,5 +1,6 @@
 @echo off
 
+set __JAVA_MIN_VERSION=18
 set OUT_DIR=.\bin
 
 echo The Shloma-style Java application building script
@@ -43,8 +44,8 @@ for /f "delims=.-_ tokens=1-2" %%v in ("%JAVA_VERSION%") do (
 	)
 )
 
-if %JAVA_MAJOR% LSS 17 (
-	echo Error: minimal version for Java is 17, your version is %JAVA_VERSION%.
+if %JAVA_MAJOR% LSS %__JAVA_MIN_VERSION% (
+	echo Error: minimal version for Java is %__JAVA_MIN_VERSION%, your version is %JAVA_VERSION%.
 	exit /b 1
 )
 
