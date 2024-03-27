@@ -1,0 +1,1 @@
+@java -cp "C:\Program Files\LibreOffice\program\classes\libreoffice.jar;postproc.jar" ru.danilakondr.md2writer.Application %*
