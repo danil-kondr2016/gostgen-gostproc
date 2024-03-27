@@ -8,7 +8,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XSearchDescriptor;
 import com.sun.star.util.XSearchable;
 
-public class TableOfContentsProcessor {
+public class TableOfContentsProcessor implements Processor {
     private final XTextDocument xDoc;
     private final XText xText;
     private final XParagraphCursor xCursor;
@@ -20,6 +20,7 @@ public class TableOfContentsProcessor {
         this.xCursor = UnoRuntime.queryInterface(XParagraphCursor.class, xTextCursor);
     }
 
+    @Override
     public void process() throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
