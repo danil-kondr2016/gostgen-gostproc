@@ -38,6 +38,7 @@ public class Application {
 		this.loadDocument();
 
 		new TableOfContentsProcessor(xDoc).process();
+		new MathFormulaProcessor(xDoc).process();
 		this.closeDocument();
 	}
 
