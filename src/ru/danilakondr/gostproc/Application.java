@@ -8,6 +8,7 @@ import com.sun.star.uno.*;
 import com.sun.star.lang.*;
 import com.sun.star.comp.helper.Bootstrap;
 
+import javax.swing.text.Style;
 import java.io.File;
 import java.lang.Exception;
 import java.lang.RuntimeException;
@@ -52,6 +53,7 @@ public class Application {
 		this.bootstrap();
 		this.loadDocument();
 
+		new StyleProcessor(xDoc).process();
 		new TableOfContentsProcessor(xDoc).process();
 		new MathFormulaProcessor(xDoc).process();
 
