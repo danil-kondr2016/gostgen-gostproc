@@ -1,5 +1,15 @@
-bin
 *.class
 *.jar
-postproc.bat
 .~lock.*
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# Ignore output directory
+out
+
+# Ignore environment directory
+env

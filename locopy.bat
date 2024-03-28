@@ -38,6 +38,18 @@ for /f "delims=. tokens=1,2" %%i in ("%LIBREOFFICE_VERSION%") do (
 	set LIBREOFFICE_MINOR=%%j
 )
 
-echo LibreOffice;%LIBREOFFICE_VERSION%;%LIBREOFFICE_HOME%>&2
+if %LIBREOFFICE_MAJOR% LSS 7 (
+	echo Error: minimal version of LibreOffice is 7.0.
+	echo Your version is %LIBREOFFICE_VERSION%.
+	exit /b 1
+)
 
-endlocal
+if not exist "%LIBREOFFICE_HOME%\classes\libreoffice.jar" (
+	echo Error: failed to find libreoffice.jar.
+	exit /b 1
+)
+
+echo Found libreoffice.jar at %LIBREOFFICE_HOME%\classes
+
+mkdir app\libs 2> nul
+copy /y "%LIBREOFFICE_HOME%\classes\libreoffice.jar" app\libs > nul
