@@ -1,10 +1,6 @@
 package ru.danilakondr.gostproc;
 
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.NoSuchElementException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.style.NumberingType;
 import com.sun.star.style.XStyle;
@@ -14,28 +10,30 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
-public class StyleProcessor extends Processor {
-    private final XNameAccess xStyleFamilies;
+public class PageStyleProcessor extends Processor {
+    private final XNameAccess xPageStyles;
 
-    public StyleProcessor(XTextDocument xDoc) {
+    public PageStyleProcessor(XTextDocument xDoc) {
         super(xDoc);
 
         XStyleFamiliesSupplier xStyleSup = UnoRuntime.queryInterface(
                 XStyleFamiliesSupplier.class,
                 xDoc
         );
-        xStyleFamilies = xStyleSup.getStyleFamilies();
+        XNameAccess xStyleFamilies = xStyleSup.getStyleFamilies();
+        try {
+            xPageStyles = UnoRuntime.queryInterface(
+                    XNameAccess.class,
+                    xStyleFamilies.getByName("PageStyles")
+            );
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void process() throws Exception {
-        setPageStyles();
-    }
-
-    private void setPageStyles() throws Exception {
-        Object oPageStyles = xStyleFamilies.getByName("PageStyles");
-        XNameAccess xPageStyles = UnoRuntime.queryInterface(XNameAccess.class, oPageStyles);
-
         setPageStyle(xPageStyles, "Standard", true);
         setPageStyle(xPageStyles, "First Page", false);
     }
