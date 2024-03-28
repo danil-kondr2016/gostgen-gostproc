@@ -1,6 +1,8 @@
 package ru.danilakondr.gostproc;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.XProperty;
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.text.*;
 import com.sun.star.frame.*;
 import com.sun.star.uno.*;
@@ -17,24 +19,35 @@ public class Application {
 	private String docURL;
     private XDesktop xDesktop;
 	private XTextDocument xDoc;
-	private XComponentContext xContext;
-	private XMultiComponentFactory xMCF;
+	private final XComponentContext xContext;
+	private final XMultiComponentFactory xMCF;
 	private boolean success = false;
 	
-	public Application() {};
+	public Application(XComponentContext xContext) {
+		this.xContext = xContext;
+		this.xMCF = this.xContext.getServiceManager();
+	};
 
 	public static void main(String[] args) {
-		Application app = new Application();
+		XComponentContext xContext = null;
+
+		try {
+			xContext = Bootstrap.bootstrap();
+		}
+		catch (Exception e) {
+			e.printStackTrace(System.err);
+			System.exit(-1);
+		}
+
+		Application app = new Application(xContext);
 		app.parseCommandLine(args);
 
 		try {
 			app.run();
+			app.terminate();
 		}
 		catch (Exception e) {
 			System.err.println(e.getMessage());
-		}
-		finally {
-			app.terminate();
 		}
 	}
 
@@ -48,7 +61,7 @@ public class Application {
 	}
 
 	public void run() throws Exception {
-		this.bootstrap();
+		this.createDesktop();
 		this.loadDocument();
 
 		new PageStyleProcessor(xDoc).process();
@@ -56,7 +69,6 @@ public class Application {
 		new MathFormulaProcessor(xDoc).process();
 
 		this.success = true;
-		this.closeDocument();
 	}
 
 	private void tryToOpen() throws Exception {
@@ -74,9 +86,7 @@ public class Application {
 			throw new RuntimeException("File has not been specified");
 	}
 
-	private void bootstrap() throws java.lang.Exception {
-        xContext = Bootstrap.bootstrap();
-		xMCF = xContext.getServiceManager();
+	private void createDesktop() throws java.lang.Exception {
 		Object oDesktop = xMCF.createInstanceWithContext(
                 "com.sun.star.frame.Desktop", xContext);
 		xDesktop = UnoRuntime.queryInterface(XDesktop.class, oDesktop);
