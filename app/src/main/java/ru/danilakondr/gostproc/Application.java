@@ -7,7 +7,6 @@ import com.sun.star.text.*;
 import com.sun.star.frame.*;
 import com.sun.star.uno.*;
 import com.sun.star.lang.*;
-import com.sun.star.comp.helper.Bootstrap;
 
 import java.io.File;
 import java.lang.Exception;
@@ -32,7 +31,7 @@ public class Application {
 		XComponentContext xContext = null;
 
 		try {
-			xContext = Bootstrap.bootstrap();
+			xContext = LibreOffice.bootstrap();
 		}
 		catch (Exception e) {
 			e.printStackTrace(System.err);
