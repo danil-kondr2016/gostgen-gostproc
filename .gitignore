@@ -1,5 +1,3 @@
-*.class
-*.jar
 .~lock.*
 
 # Ignore Gradle project-specific cache directory
@@ -8,8 +6,8 @@
 # Ignore Gradle build output directory
 build
 
-# Ignore output directory
-out
-
 # Ignore environment directory
 env
+
+# Ignore IntelliJ IDEA internal directories
+.idea
