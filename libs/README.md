@@ -2,10 +2,10 @@
 для своей работы LibreOffice UNO Runtime Environment, который поставляется с
 каждым выпуском LibreOffice.
 
-Путь к классам LibreOffice задаётся переменной `LIBREOFFICE_CLASSES`. Путь к
-основной директории LibreOffice - переменной `LIBREOFFICE_HOME`. Если эти
-переменные не указаны, программа предпримет попытку найти классы LibreOffice в
-следующих папках:
+Путь к классам LibreOffice задаётся переменной `LIBREOFFICE_CLASSES` или
+настройкой `libreoffice.classes` в файле `libreoffice.properties` в корне проекта.
+Если эта настройка не указана, программа предпримет попытку найти классы 
+LibreOffice в следующих папках:
 
 - На Windows: 
   - `%WINDIR%\..\Program Files\LibreOffice\program\classes`;
