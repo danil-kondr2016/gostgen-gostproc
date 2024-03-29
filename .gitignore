@@ -11,3 +11,4 @@ env
 
 # Ignore IntelliJ IDEA internal directories
 .idea
+/libreoffice.properties
