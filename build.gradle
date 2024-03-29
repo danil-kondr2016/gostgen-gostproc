@@ -36,7 +36,10 @@ application {
 
 tasks.register('findLibreOffice', Copy) {
     Properties pLOProp = new Properties()
-    File fLOProp = Paths.get(rootDir.getCanonicalPath(), "libreoffice.properties").toFile()
+    File fLOProp = Paths.get(
+            rootDir.getCanonicalPath(),
+            "libreoffice.properties")
+            .toFile()
     if (fLOProp.exists()) {
         FileInputStream input = new FileInputStream(fLOProp)
         pLOProp.load(input)
@@ -53,12 +56,14 @@ tasks.register('findLibreOffice', Copy) {
                     .normalize()
                     .toString();
             var p1 = Paths.get(root,
-                    "Program Files", "LibreOffice", "program", "classes")
+                    "Program Files",
+                    "LibreOffice", "program", "classes")
                     .toFile()
 
             if (!p1.exists()) {
                 var p2 = Paths.get(root,
-                        "Program Files (x86)", "LibreOffice", "program", "classes")
+                        "Program Files (x86)",
+                        "LibreOffice", "program", "classes")
                         .toFile()
                 if (p2.exists())
                     libreOfficeHome = p2.getCanonicalPath()
@@ -72,7 +77,8 @@ tasks.register('findLibreOffice', Copy) {
             if (!libLO.exists()) {
                 var opt = Paths.get("opt").toFile()
                 libreOfficeHome = opt.listFiles()
-                        .findAll { it.toPath().getFileName().startsWith("libreoffice") }
+                        .findAll { it.toPath().getFileName()
+                                .startsWith("libreoffice") }
                         .collect {it.getCanonicalPath() }
                         .max()
             }
