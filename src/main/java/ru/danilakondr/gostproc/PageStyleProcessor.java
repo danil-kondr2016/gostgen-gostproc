@@ -10,6 +10,12 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
+/**
+ * Обработчик стилей страниц.
+ *
+ * @author Данила А. Кондратенко
+ * @since 2024.03.27
+ */
 public class PageStyleProcessor extends Processor {
     private final XNameAccess xPageStyles;
 
@@ -32,12 +38,36 @@ public class PageStyleProcessor extends Processor {
         }
     }
 
+    /**
+     * Обрабатывает стили &laquo;Базовый&raquo; и
+     * &laquo;Первая страница&raquo;. Первая страница по умолчанию
+     * не имеет колонтитула.
+     *
+     * @see PageStyleProcessor#setPageStyle
+     * @throws Exception
+     */
     @Override
     public void process() throws Exception {
         setPageStyle(xPageStyles, "Standard", true);
         setPageStyle(xPageStyles, "First Page", false);
     }
 
+    /**
+     * Установка стилей одной страницы. По умолчанию устанавливает
+     * размер бумаги A4 (210 на 297 мм) и поля:
+     * <ul>
+     *     <li>левое - 30 мм;</li>
+     *     <li>правое - 15 мм;</li>
+     *     <li>верхнее и нижнее - 20 мм.</li>
+     * </ul>
+     * <p>
+     * Также при условии <code>footer == true</code> вставляется
+     * нижний колонтитул с номером страницы посередине.
+     *
+     * @param xPageStyles словарь, содержащий стили страниц
+     * @param styleName имя стиля страницы
+     * @param footer указание на вставку нижнего колонтитула
+     */
     private void setPageStyle(XNameAccess xPageStyles,
                               String styleName,
                               boolean footer
@@ -66,6 +96,12 @@ public class PageStyleProcessor extends Processor {
         }
     }
 
+    /**
+     * Добавляет номер страницы в область текста.
+     *
+     * @param xFooterText область текста
+     * @throws Exception
+     */
     private void putPageNumber(XText xFooterText) throws Exception {
         XTextCursor xCursor = xFooterText.createTextCursorByRange(xFooterText.getStart());
 
@@ -79,6 +115,12 @@ public class PageStyleProcessor extends Processor {
         xFooterText.insertTextContent(xCursor, xPageNumber, false);
     }
 
+    /**
+     * Создаёт объект номера страницы (текстовое поле).
+     *
+     * @return объект номера страницы, который можно вставить в любое место
+     * @throws Exception
+     */
     private XTextField createPageNumber() throws Exception {
         XMultiServiceFactory xMSF = UnoRuntime
                 .queryInterface(XMultiServiceFactory.class, xDoc);

@@ -13,6 +13,12 @@ import java.lang.Exception;
 import java.lang.RuntimeException;
 import java.nio.file.Path;
 
+/**
+ * Главный класс постобработчика документов с использованием LibreOffice.
+ *
+ * @author Данила А. Кондратенко
+ * @since 2024.03.26
+ */
 public class Application {
 	private String docPath;
 	private String docURL;

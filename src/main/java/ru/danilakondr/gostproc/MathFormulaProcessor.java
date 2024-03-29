@@ -9,9 +9,34 @@ import com.sun.star.uno.UnoRuntime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Обработчик математических формул на языке StarMath. Необходим, чтобы
+ * исправить некоторые косяки генератора MathML из LaTeX, который используется
+ * в Pandoc: при обработке различного рода уравнений с переносами на следующую
+ * строку получается некорректная с точки зрения LibreOffice формула, поскольку
+ * с одного из концов у оператора не хватает выражения.
+ * <p>
+ * Язык StarMath, используемый в LibreOffice, достаточно прост,
+ * поэтому были использованы регулярные выражения.
+ *
+ * @author Данила А. Кондратенко
+ * @since 2024.03.27
+ */
 public class MathFormulaProcessor extends Processor {
+    /**
+     * GUID встроенного объекта LibreOffice Math Formula.
+     *
+     * @see MathFormulaProcessor#processFormula
+     */
     public static final String MATH_FORMULA_GUID = "078B7ABA-54FC-457F-8551-6147e776a997";
-    private final Pattern left, right;
+    /**
+     * Регулярное выражение для обрыва выражения слева
+     */
+    private final Pattern left;
+    /**
+     * Регулярное выражение для обрыва выражения справа
+     */
+    private final Pattern right;
 
     public MathFormulaProcessor(XTextDocument xDoc) {
         super(xDoc);
@@ -20,6 +45,13 @@ public class MathFormulaProcessor extends Processor {
         right = Pattern.compile("([\\\\+\\-/&|=<>]|cdot|times|div|plusminus|minusplus)\\s*#");
     }
 
+    /**
+     * Ищет формулы в документе. Формулы являются встроенными объектами
+     * с соответствующим CLSID, указанным в константе
+     * <code>MATH_FORMULA_GUID</code>.
+     *
+     * @see MathFormulaProcessor#processFormula
+     */
     @Override
     public void process() throws Exception {
         XTextEmbeddedObjectsSupplier xEmbObj = UnoRuntime.queryInterface(
@@ -44,6 +76,12 @@ public class MathFormulaProcessor extends Processor {
         }
     }
 
+    /**
+     * Обрабочик одной формулы на языке StarMath.
+     *
+     * @param oFormulaSup объект, содержащий в себе формулу
+     * @throws Exception
+     */
     private void processFormula(XEmbeddedObjectSupplier oFormulaSup) throws Exception {
         Object oFormula = oFormulaSup.getEmbeddedObject();
 

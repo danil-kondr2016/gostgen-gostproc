@@ -13,6 +13,16 @@ import java.util.function.Predicate;
 
 import org.apache.commons.lang3.SystemUtils;
 
+/**
+ * Класс, который обеспечивает нахождение главного исполняемого файла
+ * LibreOffice и запускает LibreOffice в фоновом режиме. Поддерживается
+ * определение LibreOffice для трёх платформ: Windows, Linux и macOS.
+ * Есть возможность указания пути к LibreOffice через переменную среды
+ * <code>LIBREOFFICE_HOME</code>.
+ *
+ * @author Данила А. Кондратенко
+ * @since 2024.03.29
+ */
 public class LibreOffice {
     private static String find() throws Exception {
         // LIBREOFFICE_HOME - папка, где находятся исполняемые файлы

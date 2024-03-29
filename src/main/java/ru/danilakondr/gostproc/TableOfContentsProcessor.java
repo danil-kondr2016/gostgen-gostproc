@@ -8,6 +8,13 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XSearchDescriptor;
 import com.sun.star.util.XSearchable;
 
+/**
+ * Обработчик, вставляющий оглавление в документ на месте <code>%TOC%</code>.
+ * Заменяет только первое вхождение.
+ *
+ * @author Данила А. Кондратенко
+ * @since 2024.03.26
+ */
 public class TableOfContentsProcessor extends Processor {
     private final XText xText;
     private final XParagraphCursor xCursor;
@@ -20,6 +27,13 @@ public class TableOfContentsProcessor extends Processor {
         this.xCursor = UnoRuntime.queryInterface(XParagraphCursor.class, xTextCursor);
     }
 
+    /**
+     * Метод обработки. Ищет первое вхождение %TOC% и вставляет на его
+     * место оглавление.
+     *
+     * @see TableOfContentsProcessor#putTableOfContents
+     * @throws Exception
+     */
     @Override
     public void process() throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
@@ -38,6 +52,11 @@ public class TableOfContentsProcessor extends Processor {
         putTableOfContents(xCursor);
     }
 
+    /**
+     * Создаёт объект оглавления.
+     * @return объект оглавления (сервис <code>com.sun.star.text.ContentIndex</code>)
+     * @throws Exception
+     */
     private Object createIndex() throws Exception {
         XMultiServiceFactory xMSF = UnoRuntime
                 .queryInterface(XMultiServiceFactory.class, xDoc);
@@ -45,6 +64,12 @@ public class TableOfContentsProcessor extends Processor {
         return xMSF.createInstance("com.sun.star.text.ContentIndex");
     }
 
+    /**
+     * Непосредственно создаёт и помещает объект оглавления в указанном месте.
+     * @see TableOfContentsProcessor#createIndex
+     * @param cursor указатель на место вставки
+     * @throws Exception
+     */
     private void putTableOfContents(XTextCursor cursor) throws Exception {
         Object oIndex = createIndex();
 
