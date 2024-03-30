@@ -32,7 +32,6 @@ public class TableOfContentsProcessor extends Processor {
      * место оглавление.
      *
      * @see TableOfContentsProcessor#putTableOfContents
-     * @throws Exception
      */
     @Override
     public void process() throws Exception {
@@ -55,7 +54,6 @@ public class TableOfContentsProcessor extends Processor {
     /**
      * Создаёт объект оглавления.
      * @return объект оглавления (сервис <code>com.sun.star.text.ContentIndex</code>)
-     * @throws Exception
      */
     private Object createIndex() throws Exception {
         XMultiServiceFactory xMSF = UnoRuntime
@@ -68,7 +66,6 @@ public class TableOfContentsProcessor extends Processor {
      * Непосредственно создаёт и помещает объект оглавления в указанном месте.
      * @see TableOfContentsProcessor#createIndex
      * @param cursor указатель на место вставки
-     * @throws Exception
      */
     private void putTableOfContents(XTextCursor cursor) throws Exception {
         Object oIndex = createIndex();

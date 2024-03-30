@@ -44,7 +44,6 @@ public class PageStyleProcessor extends Processor {
      * не имеет колонтитула.
      *
      * @see PageStyleProcessor#setPageStyle
-     * @throws Exception
      */
     @Override
     public void process() throws Exception {
@@ -100,7 +99,6 @@ public class PageStyleProcessor extends Processor {
      * Добавляет номер страницы в область текста.
      *
      * @param xFooterText область текста
-     * @throws Exception
      */
     private void putPageNumber(XText xFooterText) throws Exception {
         XTextCursor xCursor = xFooterText.createTextCursorByRange(xFooterText.getStart());
@@ -119,7 +117,6 @@ public class PageStyleProcessor extends Processor {
      * Создаёт объект номера страницы (текстовое поле).
      *
      * @return объект номера страницы, который можно вставить в любое место
-     * @throws Exception
      */
     private XTextField createPageNumber() throws Exception {
         XMultiServiceFactory xMSF = UnoRuntime

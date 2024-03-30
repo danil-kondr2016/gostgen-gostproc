@@ -80,7 +80,6 @@ public class MathFormulaProcessor extends Processor {
      * Обрабочик одной формулы на языке StarMath.
      *
      * @param oFormulaSup объект, содержащий в себе формулу
-     * @throws Exception
      */
     private void processFormula(XEmbeddedObjectSupplier oFormulaSup) throws Exception {
         Object oFormula = oFormulaSup.getEmbeddedObject();

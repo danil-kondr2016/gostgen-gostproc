@@ -18,7 +18,6 @@ public abstract class Processor {
 
     /**
      * Абстрактный метод обработки. Требует реализации.
-     * @throws Exception
      */
     public abstract void process() throws Exception;
 }
