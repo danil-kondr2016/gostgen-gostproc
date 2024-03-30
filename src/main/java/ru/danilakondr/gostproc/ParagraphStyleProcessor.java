@@ -16,7 +16,7 @@ import com.sun.star.beans.XPropertySet;
  * Установщик стилей абзацев.
  *
  * @author Данила А. Кондратенко
- * @since 0.1
+ * @since 0.1.0
  */
 public class ParagraphStyleProcessor extends Processor {
     private final XNameAccess xParagraphStyles;

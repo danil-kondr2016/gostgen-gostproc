@@ -10,7 +10,7 @@ import com.sun.star.uno.UnoRuntime;
  * Установщик стиля первой страницы.
  *
  * @author Данила А. Кондратенко
- * @since 0.1
+ * @since 0.1.0
  */
 public class FirstPageStyleSetter extends Processor {
     private XText xText;

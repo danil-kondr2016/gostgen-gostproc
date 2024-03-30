@@ -7,7 +7,7 @@ import com.sun.star.text.XTextDocument;
  * и метод <code>process()</code>, который осуществляет обработку.
  *
  * @author Данила А. Кондратенко
- * @since 0.1
+ * @since 0.1.0
  */
 public abstract class Processor {
     protected XTextDocument xDoc;

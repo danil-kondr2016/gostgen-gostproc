@@ -15,7 +15,7 @@ import java.nio.file.Path;
  * Главный класс постобработчика документов с использованием LibreOffice.
  *
  * @author Данила А. Кондратенко
- * @since 0.1
+ * @since 0.1.0
  */
 public class Application {
 	private String docPath;

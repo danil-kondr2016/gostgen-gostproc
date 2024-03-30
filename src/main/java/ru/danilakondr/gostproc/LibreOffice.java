@@ -21,7 +21,7 @@ import org.apache.commons.lang3.SystemUtils;
  * <code>LIBREOFFICE_HOME</code>.
  *
  * @author Данила А. Кондратенко
- * @since 0.1
+ * @since 0.1.0
  */
 public class LibreOffice {
     private static String find() throws Exception {
