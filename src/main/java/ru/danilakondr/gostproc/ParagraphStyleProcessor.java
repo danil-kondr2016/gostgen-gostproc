@@ -50,6 +50,7 @@ public class ParagraphStyleProcessor extends Processor {
      */
     @Override
     public void process() throws Exception {
+        setStandardParagraphStyle();
         firstIndent("Text body");
         alignCenter("Caption");
         alignCenter("Drawing");
@@ -67,6 +68,11 @@ public class ParagraphStyleProcessor extends Processor {
         heading("Heading 3", Indent.HEADING, true);
         heading("Heading 4", Indent.HEADING, true);
         heading("Contents Heading", Indent.CENTER, false);
+    }
+
+    private void setStandardParagraphStyle() throws Exception {
+        XPropertySet xStyleProp = getStyleProperties("Standard");
+        xStyleProp.setPropertyValue("CharHeight", 14.0f);
     }
 
     private XPropertySet getStyleProperties(String styleName) throws Exception {
