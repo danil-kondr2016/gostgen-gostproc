@@ -57,14 +57,13 @@ public class ParagraphStyleProcessor extends Processor {
 
     private void defaultParameters(XPropertySet xStyleProp) throws Exception {
         xStyleProp.setPropertyValue("ParaLineSpacing", new LineSpacing(LineSpacingMode.PROP, (short) 150));
-        xStyleProp.setPropertyValue("CharHeight", 14.0);
+        xStyleProp.setPropertyValue("CharHeight", 14.0f);
         xStyleProp.setPropertyValue("ParaLeftMargin", 0);
         xStyleProp.setPropertyValue("ParaRightMargin", 0);
         xStyleProp.setPropertyValue("ParaTopMargin", 0);
         xStyleProp.setPropertyValue("ParaBottomMargin", 0);
-        xStyleProp.setPropertyValue("ParaFirstLineIndent", 12500);
-        xStyleProp.setPropertyValue("ParaOrphans", 0);
-        xStyleProp.setPropertyValue("ParaWidows", 0);
+        xStyleProp.setPropertyValue("ParaOrphans", (byte)0);
+        xStyleProp.setPropertyValue("ParaWidows", (byte)0);
     }
 
     private void firstIndent(String styleName) throws Exception {
@@ -74,6 +73,7 @@ public class ParagraphStyleProcessor extends Processor {
         );
 
         defaultParameters(xStyleProp);
+        xStyleProp.setPropertyValue("ParaFirstLineIndent", 1250);
         xStyleProp.setPropertyValue("ParaAdjust", ParagraphAdjust.STRETCH);
     }
 
