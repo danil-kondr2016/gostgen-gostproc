@@ -7,7 +7,6 @@ import com.sun.star.uno.*;
 import com.sun.star.lang.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.Exception;
 import java.lang.RuntimeException;
 import java.nio.file.Path;
@@ -30,7 +29,7 @@ public class Application {
 	public Application(XComponentContext xContext) {
 		this.xContext = xContext;
 		this.xMCF = this.xContext.getServiceManager();
-	};
+	}
 
 	public static void main(String[] args) {
 		XComponentContext xContext = null;
@@ -79,6 +78,7 @@ public class Application {
 		this.loadDocument();
 
 		new ParagraphStyleProcessor(xDoc).process();
+		new OutlineStyleProcessor(xDoc).process();
 		new PageStyleProcessor(xDoc).process();
 		new MathFormulaProcessor(xDoc).process();
 		new TableOfContentsProcessor(xDoc).process();

@@ -2,11 +2,10 @@ package ru.danilakondr.gostproc;
 
 import com.sun.star.awt.FontSlant;
 import com.sun.star.awt.FontWeight;
+import com.sun.star.container.XIndexReplace;
 import com.sun.star.container.XNameAccess;
-import com.sun.star.style.LineSpacing;
-import com.sun.star.style.LineSpacingMode;
-import com.sun.star.style.ParagraphAdjust;
-import com.sun.star.style.XStyleFamiliesSupplier;
+import com.sun.star.style.*;
+import com.sun.star.text.XChapterNumberingSupplier;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
@@ -24,7 +23,7 @@ public class ParagraphStyleProcessor extends Processor {
 
     public enum Indent {
         LEFT, PARAGRAPH, HEADING, CENTER, RIGHT
-    };
+    }
 
     public ParagraphStyleProcessor(XTextDocument xDoc) {
         super(xDoc);
@@ -75,6 +74,12 @@ public class ParagraphStyleProcessor extends Processor {
         XPropertySet xStyleProp = getStyleProperties(styleName);
 
         setParagraphStyleParameters(xStyleProp, indent, true);
+
+        /* Нумерация */
+        if (numbered)
+            xStyleProp.setPropertyValue("NumberingStyleName", "Outline");
+        else
+            xStyleProp.setPropertyValue("NumberingStyleName", null);
     }
 
     private void setParagraphStyleParameters(XPropertySet xStyleProp,
