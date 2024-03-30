@@ -42,11 +42,6 @@ public class Application {
 		this.xMCF = null;
 	}
 
-	public Application(XComponentContext xContext) {
-		this.xContext = xContext;
-		this.xMCF = this.xContext.getServiceManager();
-	}
-
 	private void setContext(XComponentContext xContext) {
 		this.xContext = xContext;
 		this.xMCF = this.xContext.getServiceManager();
