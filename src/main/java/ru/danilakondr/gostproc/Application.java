@@ -48,10 +48,12 @@ public class Application {
 
 		try {
 			app.run();
-			app.terminate();
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
+			e.printStackTrace(System.err);
+		}
+		finally {
+			app.terminate();
 		}
 	}
 
