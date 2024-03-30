@@ -105,12 +105,9 @@ public class PageStyleProcessor extends Processor {
 
         xCursor.gotoStart(false);
         xCursor.gotoEnd(true);
-        xFooterText.insertString(xCursor, "", true);
-
-        xFooterText.insertString(xCursor, "\t", false);
 
         XTextField xPageNumber = createPageNumber();
-        xFooterText.insertTextContent(xCursor, xPageNumber, false);
+        xFooterText.insertTextContent(xCursor, xPageNumber, true);
     }
 
     /**

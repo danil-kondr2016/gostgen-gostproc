@@ -55,6 +55,9 @@ public class ParagraphStyleProcessor extends Processor {
         alignCenter("Drawing");
         alignCenter("Illustration");
         alignCenter("Figure");
+        alignCenter("Footer");
+        alignCenter("Footer left");
+        alignCenter("Footer right");
         alignLeft("Contents 1");
         alignLeft("Contents 2");
         alignLeft("Contents 3");
