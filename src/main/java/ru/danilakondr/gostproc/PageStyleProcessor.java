@@ -14,7 +14,7 @@ import com.sun.star.uno.UnoRuntime;
  * Обработчик стилей страниц. Оформляет поля в соответствии с ГОСТом.
  *
  * @author Данила А. Кондратенко
- * @since 0.1.0.0
+ * @since 0.1.0
  */
 public class PageStyleProcessor extends Processor {
     private final XNameAccess xPageStyles;

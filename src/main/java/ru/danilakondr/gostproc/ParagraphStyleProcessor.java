@@ -2,10 +2,8 @@ package ru.danilakondr.gostproc;
 
 import com.sun.star.awt.FontSlant;
 import com.sun.star.awt.FontWeight;
-import com.sun.star.container.XIndexReplace;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.style.*;
-import com.sun.star.text.XChapterNumberingSupplier;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
@@ -21,6 +19,9 @@ import com.sun.star.beans.XPropertySet;
 public class ParagraphStyleProcessor extends Processor {
     private final XNameAccess xParagraphStyles;
 
+    /**
+     * Тип выравнивания.
+     */
     public enum Indent {
         LEFT, PARAGRAPH, HEADING, CENTER, RIGHT
     }
@@ -44,6 +45,9 @@ public class ParagraphStyleProcessor extends Processor {
         }
     }
 
+    /**
+     * Редактирует стили абзацев.
+     */
     @Override
     public void process() throws Exception {
         firstIndent("Text body");
@@ -69,7 +73,14 @@ public class ParagraphStyleProcessor extends Processor {
         );
     }
 
-    // TODO реализовать нумерацию
+    /**
+     * Редактирует стиль заголовка.
+     *
+     * @param styleName название стиля заголовка
+     * @param indent тип выравнивания
+     * @param numbered установка нумерации
+     * @since 0.1.2
+     */
     private void heading(String styleName, Indent indent, boolean numbered) throws Exception {
         XPropertySet xStyleProp = getStyleProperties(styleName);
 
