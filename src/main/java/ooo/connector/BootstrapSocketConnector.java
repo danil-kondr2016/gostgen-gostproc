@@ -62,7 +62,7 @@ public class BootstrapSocketConnector extends BootstrapConnector {
         String hostAndPort = "host="+host+",port="+port;
 
         // accept option
-        String oooAcceptOption = "-accept=socket,"+hostAndPort+";urp;";
+        String oooAcceptOption = "--accept=socket,"+hostAndPort+";urp;";
 
         // connection string
         String unoConnectString = "uno:socket,"+hostAndPort+";urp;StarOffice.ComponentContext";

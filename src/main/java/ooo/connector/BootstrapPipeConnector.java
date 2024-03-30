@@ -62,7 +62,7 @@ public class BootstrapPipeConnector extends BootstrapConnector {
     public XComponentContext connect(String pipeName) throws BootstrapException {
 
         // accept option
-        String oooAcceptOption = "-accept=pipe,name=" + pipeName + ";urp;";
+        String oooAcceptOption = "--accept=pipe,name=" + pipeName + ";urp;";
 
         // connection string
         String unoConnectString = "uno:pipe,name=" + pipeName + ";urp;StarOffice.ComponentContext";

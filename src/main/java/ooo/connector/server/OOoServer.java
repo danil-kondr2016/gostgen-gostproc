@@ -164,11 +164,11 @@ public class OOoServer {
 
         ArrayList<String> options = new ArrayList<>();
 
-        options.add("-nologo");
-        options.add("-nodefault");
-        options.add("-norestore");
-        options.add("-nocrashreport");
-        options.add("-nolockcheck");
+        options.add("--nologo");
+        options.add("--nodefault");
+        options.add("--norestore");
+        options.add("--nocrashreport");
+        options.add("--nolockcheck");
 
         return options;
     }
