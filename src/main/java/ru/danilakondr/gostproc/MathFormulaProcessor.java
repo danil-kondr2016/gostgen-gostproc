@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * поэтому были использованы регулярные выражения.
  *
  * @author Данила А. Кондратенко
- * @since 2024.03.27
+ * @since 0.1
  */
 public class MathFormulaProcessor extends Processor {
     /**

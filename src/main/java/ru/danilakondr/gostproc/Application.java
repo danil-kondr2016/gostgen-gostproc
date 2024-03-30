@@ -1,8 +1,6 @@
 package ru.danilakondr.gostproc;
 
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.XProperty;
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.text.*;
 import com.sun.star.frame.*;
 import com.sun.star.uno.*;
@@ -17,7 +15,7 @@ import java.nio.file.Path;
  * Главный класс постобработчика документов с использованием LibreOffice.
  *
  * @author Данила А. Кондратенко
- * @since 2024.03.26
+ * @since 0.1
  */
 public class Application {
 	private String docPath;
@@ -69,9 +67,11 @@ public class Application {
 		this.createDesktop();
 		this.loadDocument();
 
+		new ParagraphStyleProcessor(xDoc).process();
 		new PageStyleProcessor(xDoc).process();
-		new TableOfContentsProcessor(xDoc).process();
 		new MathFormulaProcessor(xDoc).process();
+		new TableOfContentsProcessor(xDoc).process();
+		new FirstPageStyleSetter(xDoc).process();
 
 		this.success = true;
 	}

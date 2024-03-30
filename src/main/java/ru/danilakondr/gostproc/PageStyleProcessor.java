@@ -14,7 +14,7 @@ import com.sun.star.uno.UnoRuntime;
  * Обработчик стилей страниц.
  *
  * @author Данила А. Кондратенко
- * @since 2024.03.27
+ * @since 0.1
  */
 public class PageStyleProcessor extends Processor {
     private final XNameAccess xPageStyles;

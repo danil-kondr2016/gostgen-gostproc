@@ -13,7 +13,7 @@ import com.sun.star.util.XSearchable;
  * Заменяет только первое вхождение.
  *
  * @author Данила А. Кондратенко
- * @since 2024.03.26
+ * @since 0.1
  */
 public class TableOfContentsProcessor extends Processor {
     private final XText xText;
