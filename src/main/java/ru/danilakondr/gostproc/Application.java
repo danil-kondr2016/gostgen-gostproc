@@ -11,6 +11,8 @@ import java.lang.Exception;
 import java.lang.RuntimeException;
 import java.nio.file.Path;
 
+import org.kohsuke.args4j.*;
+
 /**
  * Главный класс постобработчика документов с использованием LibreOffice.
  *
@@ -18,55 +20,80 @@ import java.nio.file.Path;
  * @since 0.1.0
  */
 public class Application {
+	@Argument(usage="Input file", metaVar="INPUT")
 	private String docPath;
+	@Option(name="-o", aliases={"--out"}, usage="Output file", metaVar="OUTPUT")
+	private String outPath;
+	@Option(name="-n", aliases={"--no-first-page-footer"}, usage="Don't place footer on the first page")
+	private boolean noFirstPageFooter;
+
+	@Option(name="-h", aliases={"--help", "-?"})
+	private boolean help;
+
 	private String docURL;
     private XDesktop xDesktop;
 	private XTextDocument xDoc;
-	private final XComponentContext xContext;
-	private final XMultiComponentFactory xMCF;
+	private XComponentContext xContext;
+	private XMultiComponentFactory xMCF;
 	private boolean success = false;
-	
+
+	public Application() {
+		this.xContext = null;
+		this.xMCF = null;
+	}
+
 	public Application(XComponentContext xContext) {
 		this.xContext = xContext;
 		this.xMCF = this.xContext.getServiceManager();
 	}
 
-	public static void main(String[] args) {
-		XComponentContext xContext = null;
+	private void setContext(XComponentContext xContext) {
+		this.xContext = xContext;
+		this.xMCF = this.xContext.getServiceManager();
+	}
 
+	public static void main(String[] args) {
+		Application app = new Application();
+		CmdLineParser parser = new CmdLineParser(app);
+		try {
+			parser.parseArgument(args);
+		}
+		catch (CmdLineException e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
+		}
+
+		if (app.help) {
+			System.out.println("Usage:");
+			System.out.print("postproc ");
+			parser.printSingleLineUsage(System.out);
+			System.out.println();
+			System.out.println();
+			parser.printUsage(System.out);
+			System.exit(0);
+		}
+
+		XComponentContext xContext = null;
 		try {
 			xContext = LibreOffice.bootstrap();
+			app.setContext(xContext);
 		}
 		catch (Exception e) {
 			e.printStackTrace(System.err);
 			System.exit(-1);
 		}
 
-		Application app = new Application(xContext);
-		app.parseCommandLine(args);
-
+		int status = 0;
 		try {
 			app.run();
 		}
 		catch (Exception e) {
 			e.printStackTrace(System.err);
+			status = 1;
 		}
 		finally {
 			app.terminate();
-		}
-	}
-
-	/**
-	 * Обработка аргументов командной строки.
-	 *
-	 * @param args массив с аргументами
-	 */
-	public void parseCommandLine(String[] args) {
-		if (args.length < 1) {
-			docPath = null;
-		}
-		else {
-			docPath = args[0];
+			System.exit(status);
 		}
 	}
 
@@ -82,7 +109,8 @@ public class Application {
 		new PageStyleProcessor(xDoc).process();
 		new MathFormulaProcessor(xDoc).process();
 		new TableOfContentsProcessor(xDoc).process();
-		new FirstPageStyleSetter(xDoc).process();
+		if (noFirstPageFooter)
+			new FirstPageStyleSetter(xDoc).process();
 
 		this.success = true;
 	}
@@ -137,8 +165,23 @@ public class Application {
 	 * Закрывает документ.
 	 */
 	private void closeDocument() throws Exception {
+        String outURL;
+        if (outPath != null) {
+			outURL = Path.of(outPath)
+					.toAbsolutePath()
+					.toUri()
+					.toString();
+		} else {
+			outURL = null;
+		}
+
 		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
-		xStorable.store();
+		if (outURL == null) {
+			xStorable.store();
+		} else {
+			PropertyValue[] props = new PropertyValue[0];
+			xStorable.storeAsURL(outURL, props);
+		}
 	}
 
 	/**
