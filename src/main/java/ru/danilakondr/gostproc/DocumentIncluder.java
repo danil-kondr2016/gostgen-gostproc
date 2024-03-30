@@ -19,18 +19,37 @@ import java.util.regex.Pattern;
  * <p>
  * При обработке документа должен вызываться первым, поскольку включаемые
  * документы тоже могут иметь в себе макросы. Внутренние <code>%INCLUDE(...)%</code>
- * не обрабатываются.
+ * обрабатываются на 16 уровней в глубину. Это ограничение необходимо для того, чтобы
+ * избежать занимания всей памяти и нарушения работы компьютера.
  *
  * @author Данила А. Кондратенко
  * @since 0.1.5
  */
 public class DocumentIncluder extends Processor {
+    private static final int INCLUDE_DEPTH_LIMIT = 16;
     public DocumentIncluder(XTextDocument xDoc) {
         super(xDoc);
     }
 
-    @Override
     public void process() throws Exception {
+        int i;
+        for (i = 0; i < INCLUDE_DEPTH_LIMIT; i++) {
+            if (!processSingleLevel())
+                break;
+        }
+
+        XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
+        XSearchDescriptor xSD = xS.createSearchDescriptor();
+
+        xSD.setSearchString("%INCLUDE\\(.*\\)%");
+        xSD.setPropertyValue("SearchRegularExpression", true);
+
+        if (xS.findFirst(xSD) != null) {
+            throw new Exception("%INCLUDE% nested too deeply; maximal depth is " + INCLUDE_DEPTH_LIMIT);
+        }
+    }
+
+    private boolean processSingleLevel() throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
 
@@ -38,6 +57,9 @@ public class DocumentIncluder extends Processor {
         xSD.setPropertyValue("SearchRegularExpression", true);
 
         XIndexAccess found = xS.findAll(xSD);
+        if (found.getCount() == 0)
+            return false;
+
         for (int i = 0; i < found.getCount(); i++) {
             Object oFound = found.getByIndex(i);
             XTextRange xFound = UnoRuntime.queryInterface(
@@ -46,6 +68,8 @@ public class DocumentIncluder extends Processor {
             );
             processSingleInclude(xFound);
         }
+
+        return true;
     }
 
     private void processSingleInclude(XTextRange xRange) throws Exception {
