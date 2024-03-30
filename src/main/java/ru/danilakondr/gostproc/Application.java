@@ -99,6 +99,7 @@ public class Application {
 		this.createDesktop();
 		this.loadDocument();
 
+		new DocumentIncluder(xDoc).process();
 		new ParagraphStyleProcessor(xDoc).process();
 		new OutlineStyleProcessor(xDoc).process();
 		new PageStyleProcessor(xDoc).process();
