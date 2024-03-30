@@ -7,6 +7,7 @@ import com.sun.star.uno.*;
 import com.sun.star.lang.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.Exception;
 import java.lang.RuntimeException;
 import java.nio.file.Path;
@@ -54,6 +55,11 @@ public class Application {
 		}
 	}
 
+	/**
+	 * Обработка аргументов командной строки.
+	 *
+	 * @param args массив с аргументами
+	 */
 	public void parseCommandLine(String[] args) {
 		if (args.length < 1) {
 			docPath = null;
@@ -63,6 +69,9 @@ public class Application {
 		}
 	}
 
+	/**
+	 * Запуск приложения.
+	 */
 	public void run() throws Exception {
 		this.createDesktop();
 		this.loadDocument();
@@ -76,6 +85,10 @@ public class Application {
 		this.success = true;
 	}
 
+	/**
+	 * Попытка открытия файла по заданному в командной строке адресу.
+	 * Устанавливает URL, по которому хранится обрабатываемый файл.
+	 */
 	private void tryToOpen() throws Exception {
 		if (docPath != null) {
 			File f = new File(docPath);
@@ -88,15 +101,21 @@ public class Application {
 		}
 
 		if (docURL == null)
-			throw new RuntimeException("File has not been specified");
+			throw new Exception("File has not been specified");
 	}
 
+	/**
+	 * Создаёт &laquo;рабочий стол&raquo; LibreOffice.
+	 */
 	private void createDesktop() throws java.lang.Exception {
 		Object oDesktop = xMCF.createInstanceWithContext(
                 "com.sun.star.frame.Desktop", xContext);
 		xDesktop = UnoRuntime.queryInterface(XDesktop.class, oDesktop);
 	}
-	
+
+	/**
+	 * Открывает документ.
+	 */
 	private void loadDocument() throws Exception {
 		tryToOpen();
 
@@ -112,11 +131,17 @@ public class Application {
 		xDoc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
 	}
 
+	/**
+	 * Закрывает документ.
+	 */
 	private void closeDocument() throws Exception {
 		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
 		xStorable.store();
 	}
 
+	/**
+	 * Завершает приложение.
+	 */
 	public void terminate() {
 		if (this.success) {
 			try {

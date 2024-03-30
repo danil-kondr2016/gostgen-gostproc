@@ -11,7 +11,7 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 /**
- * Обработчик стилей страниц.
+ * Обработчик стилей страниц. Оформляет поля в соответствии с ГОСТом.
  *
  * @author Данила А. Кондратенко
  * @since 0.1.0.0
