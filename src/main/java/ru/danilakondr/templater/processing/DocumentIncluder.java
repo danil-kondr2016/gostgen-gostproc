@@ -21,13 +21,16 @@ import java.util.regex.Pattern;
  * документы тоже могут иметь в себе макросы. Внутренние <code>%INCLUDE(...)%</code>
  * обрабатываются на 16 уровней в глубину. Это ограничение необходимо для того, чтобы
  * избежать заполнения всей памяти и зависания.
+ * <p>
+ * Также обрабатывается макрос %MAIN_TEXT%: на месте его вставляется
+ * главный текст документа.
  *
  * @author Данила А. Кондратенко
  * @since 0.1.5
  */
 public class DocumentIncluder extends Processor {
     private static final int INCLUDE_DEPTH_LIMIT = 16;
-    private String mainTextURL;
+    private final String mainTextURL;
 
     public DocumentIncluder(XTextDocument xDoc, String mainTextURL) {
         super(xDoc);
@@ -53,6 +56,12 @@ public class DocumentIncluder extends Processor {
         }
     }
 
+    /**
+     * Вставляет главный текст документа в шаблон.
+     *
+     * @see DocumentIncluder#insertDocument 
+     * @since 0.2.0
+     */
     private void insertMainText() throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
@@ -68,6 +77,14 @@ public class DocumentIncluder extends Processor {
         insertDocument(mainTextURL, xFound);
     }
 
+    /**
+     * Обрабатывает один уровень <code>%INCLUDE(...)%</code>.
+     *
+     * @see DocumentIncluder#insertDocument
+     * @see DocumentIncluder#processSingleInclude 
+     * @return наличие <code>%INCLUDE(...)%</code> в документе.
+     * @since 0.1.5
+     */
     private boolean processSingleLevel() throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
@@ -91,6 +108,14 @@ public class DocumentIncluder extends Processor {
         return true;
     }
 
+    /**
+     * Обрабатывает один конкретный <code>%INCLUDE(...)%</code>. Вставляет документ
+     * на его месте.
+     *
+     * @see DocumentIncluder#insertDocument 
+     * @param xRange место, где найден макрос <code>%INCLUDE(...)%</code>
+     * @since 0.1.5
+     */
     private void processSingleInclude(XTextRange xRange) throws Exception {
         Pattern macro = Pattern.compile("%INCLUDE\\((.*)\\)%");
         String include = macro.matcher(xRange.getString()).replaceAll("$1");
@@ -105,6 +130,13 @@ public class DocumentIncluder extends Processor {
         insertDocument(url, xRange);
     }
 
+    /**
+     * Вставляет произвольный документ на произвольном месте.
+     *
+     * @param url URL-адрес документа
+     * @param at место, куда нужно вставить документ
+     * @since 0.2.0
+     */
     private void insertDocument(String url, XTextRange at) throws Exception {
         XTextCursor xCursor = xDoc.getText().createTextCursorByRange(at);
         xCursor.gotoRange(at, true);
