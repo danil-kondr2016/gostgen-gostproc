@@ -1,4 +1,4 @@
-package ru.danilakondr.gostproc;
+package ru.danilakondr.gostproc.processing;
 
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameAccess;

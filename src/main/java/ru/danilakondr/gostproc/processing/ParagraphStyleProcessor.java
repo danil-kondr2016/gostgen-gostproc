@@ -1,4 +1,4 @@
-package ru.danilakondr.gostproc;
+package ru.danilakondr.gostproc.processing;
 
 import com.sun.star.awt.FontSlant;
 import com.sun.star.awt.FontWeight;

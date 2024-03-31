@@ -12,6 +12,7 @@ import java.lang.RuntimeException;
 import java.nio.file.Path;
 
 import org.kohsuke.args4j.*;
+import ru.danilakondr.gostproc.processing.*;
 
 /**
  * Главный класс постобработчика документов с использованием LibreOffice.
