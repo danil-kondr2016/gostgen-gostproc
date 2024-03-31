@@ -121,7 +121,7 @@ public class Application {
 		new ParagraphStyleProcessor(xDoc, fonts).process();
 		new OutlineStyleProcessor(xDoc).process();
 		new PageStyleProcessor(xDoc).process();
-		new MathFormulaProcessor(xDoc).process();
+		new MathFormulaProcessor(xDoc, fonts).process();
 		new TableOfContentsProcessor(xDoc).process();
 		if (noFirstPageFooter)
 			new FirstPageStyleSetter(xDoc).process();
