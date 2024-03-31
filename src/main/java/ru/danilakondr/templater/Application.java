@@ -30,8 +30,8 @@ public class Application {
 	@Option(name="-o", aliases={"--output"}, usage="Output file", required = true)
 	private String outputPath;
 
-	@Option(name="-d", aliases={"--definitions"}, usage="Definitions file")
-	private String defFile;
+	@Option(name="-M", aliases={"--macros"}, usage="Macros file")
+	private String macroFile;
 
 	@Option(name="-e", aliases={"--embed-fonts"}, usage="Embed fonts")
 	private boolean embedFonts;
@@ -48,7 +48,7 @@ public class Application {
 	public Application() {
 		this.xContext = null;
 		this.xMCF = null;
-		this.defFile = null;
+		this.macroFile = null;
 	}
 
 	public void setContext(XComponentContext xContext) {
@@ -115,12 +115,12 @@ public class Application {
 
 		new DocumentIncluder(xDoc, mainTextURL).process();
 		new MathFormulaProcessor(xDoc).process();
-		if (defFile != null) {
-			if (new File(defFile).exists()) {
-				new DefinitionProcessor(xDoc, defFile).process();
+		if (macroFile != null) {
+			if (new File(macroFile).exists()) {
+				new MacroProcessor(xDoc, macroFile).process();
 			}
 			else {
-				System.err.printf("File %s not found, skipping\n", defFile);
+				System.err.printf("File %s not found, skipping\n", macroFile);
 			}
 		}
 		new TableOfContentsProcessor(xDoc).process();

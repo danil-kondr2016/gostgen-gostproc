@@ -3,11 +3,17 @@ package ru.danilakondr.templater.processing;
 import java.io.*;
 import java.util.HashMap;
 
-public class Definitions extends HashMap<String, String> {
-    public Definitions(File f) throws IOException {
+/**
+ * Велосипед для обработки файлов с макросами.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.2.1
+ */
+public class Macros extends HashMap<String, String> {
+    public Macros(File f) throws IOException {
         this(f.getPath());
     }
-    public Definitions(String path) throws IOException {
+    public Macros(String path) throws IOException {
         super();
         loadFile(path);
     }
