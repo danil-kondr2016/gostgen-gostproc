@@ -30,10 +30,13 @@ public class Application {
 	@Option(name="-o", aliases={"--output"}, usage="Output file", required = true)
 	private String outputPath;
 
+	@Option(name="-d", aliases={"--definitions"}, usage="Definitions file")
+	private String defFile;
+
 	@Option(name="-e", aliases={"--embed-fonts"}, usage="Embed fonts")
 	private boolean embedFonts;
 
-	@Option(name="-h", aliases={"--help", "-?"})
+	@Option(name="-h", aliases=	{"--help", "-?"})
 	private boolean help;
 
     private XDesktop xDesktop;
@@ -45,6 +48,7 @@ public class Application {
 	public Application() {
 		this.xContext = null;
 		this.xMCF = null;
+		this.defFile = null;
 	}
 
 	public void setContext(XComponentContext xContext) {
@@ -111,6 +115,14 @@ public class Application {
 
 		new DocumentIncluder(xDoc, mainTextURL).process();
 		new MathFormulaProcessor(xDoc).process();
+		if (defFile != null) {
+			if (new File(defFile).exists()) {
+				new DefinitionProcessor(xDoc, defFile).process();
+			}
+			else {
+				System.err.printf("File %s not found, skipping\n", defFile);
+			}
+		}
 		new TableOfContentsProcessor(xDoc).process();
 
 		this.success = true;
