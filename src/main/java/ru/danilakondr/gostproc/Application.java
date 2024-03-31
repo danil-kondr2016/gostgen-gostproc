@@ -6,12 +6,10 @@ import com.sun.star.frame.*;
 import com.sun.star.uno.*;
 import com.sun.star.lang.*;
 
-import java.awt.*;
 import java.io.File;
 import java.lang.Exception;
 import java.lang.RuntimeException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.kohsuke.args4j.*;
 import ru.danilakondr.gostproc.fonts.FontTriple;
@@ -29,14 +27,9 @@ public class Application {
 	private String docPath;
 	@Option(name="-o", aliases={"--out"}, usage="Output file", metaVar="OUTPUT")
 	private String outPath;
-	@Option(name="-n", aliases={"--no-first-page-footer"}, usage="Don't place footer on the first page")
-	private boolean noFirstPageFooter;
 
 	@Option(name="-h", aliases={"--help", "-?"})
 	private boolean help;
-
-	@Option(name="-f", aliases={"--font-triple"}, handler=FontTripleHandler.class, usage="Specify triple of fonts: serif;sans;monospace")
-	private FontTriple fonts;
 
 	private String docURL;
     private XDesktop xDesktop;
@@ -108,23 +101,12 @@ public class Application {
 	 * Запуск приложения.
 	 */
 	public void run() throws Exception {
-		if (fonts == null) {
-			fonts = FontTriple.provide();
-		}
-		if (fonts != null && !fonts.exists()) {
-			throw new Exception("Font triple \"" + fonts.toString() + "\" don't exists");
-		}
 		this.createDesktop();
 		this.loadDocument();
 
 		new DocumentIncluder(xDoc).process();
-		new ParagraphStyleProcessor(xDoc, fonts).process();
-		new OutlineStyleProcessor(xDoc).process();
-		new PageStyleProcessor(xDoc).process();
-		new MathFormulaProcessor(xDoc, fonts).process();
+		new MathFormulaProcessor(xDoc).process();
 		new TableOfContentsProcessor(xDoc).process();
-		if (noFirstPageFooter)
-			new FirstPageStyleSetter(xDoc).process();
 
 		this.success = true;
 	}

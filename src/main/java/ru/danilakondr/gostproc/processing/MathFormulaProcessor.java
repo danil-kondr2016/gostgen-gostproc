@@ -5,7 +5,6 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.document.XEmbeddedObjectSupplier;
 import com.sun.star.text.*;
 import com.sun.star.uno.UnoRuntime;
-import ru.danilakondr.gostproc.fonts.FontTriple;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,8 +18,6 @@ import java.util.regex.Pattern;
  * <p>
  * Язык StarMath, используемый в LibreOffice, достаточно прост,
  * поэтому были использованы регулярные выражения.
- * <p>
- * Кроме того, обработчик задаёт шрифты, используемые в формуле.
  *
  * @author Данила А. Кондратенко
  * @since 0.1.0
@@ -40,12 +37,8 @@ public class MathFormulaProcessor extends Processor {
      * Регулярное выражение для обрыва выражения справа
      */
     private final Pattern right;
-
-    private final FontTriple fonts;
-
-    public MathFormulaProcessor(XTextDocument xDoc, FontTriple fonts) {
+    public MathFormulaProcessor(XTextDocument xDoc) {
         super(xDoc);
-        this.fonts = fonts;
 
         left = Pattern.compile("#\\s*([*/&|=<>]|cdot|times|div)");
         right = Pattern.compile("([\\\\+\\-/&|=<>]|cdot|times|div|plusminus|minusplus)\\s*#");
@@ -101,14 +94,7 @@ public class MathFormulaProcessor extends Processor {
         String sFormula2 = rMatch.replaceAll("$1 {} #");
 
         xPropertySet.setPropertyValue("Formula", sFormula2);
-        xPropertySet.setPropertyValue("FontNameFunctions", fonts.serif);
-        xPropertySet.setPropertyValue("FontNameNumbers", fonts.serif);
-        xPropertySet.setPropertyValue("FontNameText", fonts.serif);
-        xPropertySet.setPropertyValue("FontNameVariables", fonts.serif);
-        xPropertySet.setPropertyValue("FontVariablesIsItalic", true);
-        xPropertySet.setPropertyValue("CustomFontNameFixed", fonts.mono);
-        xPropertySet.setPropertyValue("CustomFontNameSerif", fonts.serif);
-        xPropertySet.setPropertyValue("CustomFontNameSans", fonts.sans);
-        xPropertySet.setPropertyValue("BaseFontHeight", (short)14);
+        // Здесь стоит всё-таки подумать над тем, как правильно
+        // обрабатывать шрифты...
     }
 }
