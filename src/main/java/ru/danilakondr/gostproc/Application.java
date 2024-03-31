@@ -1,19 +1,17 @@
 package ru.danilakondr.gostproc;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.text.*;
 import com.sun.star.frame.*;
 import com.sun.star.uno.*;
 import com.sun.star.lang.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.Exception;
-import java.lang.RuntimeException;
-import java.nio.file.Path;
 
 import org.kohsuke.args4j.*;
-import ru.danilakondr.gostproc.fonts.FontTriple;
-import ru.danilakondr.gostproc.fonts.FontTripleHandler;
 import ru.danilakondr.gostproc.processing.*;
 
 /**
@@ -23,15 +21,21 @@ import ru.danilakondr.gostproc.processing.*;
  * @since 0.1.0
  */
 public class Application {
-	@Argument(usage="Input file", metaVar="INPUT")
-	private String docPath;
-	@Option(name="-o", aliases={"--out"}, usage="Output file", metaVar="OUTPUT")
-	private String outPath;
+	@Option(name="-t", aliases={"--template"}, usage="Template file", required = true)
+	private String templatePath;
+
+	@Option(name="-m", aliases={"--main-text"}, usage="Main text file", required = false)
+	private String mainTextPath;
+
+	@Option(name="-o", aliases={"--output"}, usage="Output file", required = true)
+	private String outputPath;
+
+	@Option(name="-e", aliases={"--embed-fonts"}, usage="Embed fonts")
+	private boolean embedFonts;
 
 	@Option(name="-h", aliases={"--help", "-?"})
 	private boolean help;
 
-	private String docURL;
     private XDesktop xDesktop;
 	private XTextDocument xDoc;
 	private XComponentContext xContext;
@@ -43,16 +47,12 @@ public class Application {
 		this.xMCF = null;
 	}
 
-	private void setContext(XComponentContext xContext) {
+	public void setContext(XComponentContext xContext) {
 		this.xContext = xContext;
 		this.xMCF = this.xContext.getServiceManager();
 	}
 
 	public static void main(String[] args) {
-		OptionHandlerRegistry
-				.getRegistry()
-				.registerHandler(FontTriple.class, FontTripleHandler.class);
-
 		Application app = new Application();
 		CmdLineParser parser = new CmdLineParser(app);
 		try {
@@ -102,32 +102,13 @@ public class Application {
 	 */
 	public void run() throws Exception {
 		this.createDesktop();
-		this.loadDocument();
+		this.loadTemplate();
 
 		new DocumentIncluder(xDoc).process();
 		new MathFormulaProcessor(xDoc).process();
 		new TableOfContentsProcessor(xDoc).process();
 
 		this.success = true;
-	}
-
-	/**
-	 * Попытка открытия файла по заданному в командной строке адресу.
-	 * Определяет URL, по которому хранится обрабатываемый файл.
-	 */
-	private void tryToOpen() throws Exception {
-		if (docPath != null) {
-			File f = new File(docPath);
-			if (!f.exists()) {
-				throw new RuntimeException("Cannot open file " + f);
-			}
-
-			Path p = f.toPath();
-			this.docURL = p.toUri().toString();
-		}
-
-		if (docURL == null)
-			throw new Exception("File has not been specified");
 	}
 
 	/**
@@ -139,11 +120,19 @@ public class Application {
 		xDesktop = UnoRuntime.queryInterface(XDesktop.class, oDesktop);
 	}
 
-	/**
-	 * Открывает документ.
-	 */
-	private void loadDocument() throws Exception {
-		tryToOpen();
+	private String getURI(String path, boolean read) {
+		File f = new File(path).getAbsoluteFile();
+
+		if (read && !f.exists())
+			return null;
+
+		return f.toPath().toUri().toString();
+	}
+
+	private void loadTemplate() throws Exception {
+		String templateURL = getURI(templatePath, true);
+		if (templateURL == null)
+			throw new FileNotFoundException();
 
 		XComponentLoader xCompLoader = UnoRuntime
 				.queryInterface(XComponentLoader.class, xDesktop);
@@ -153,40 +142,36 @@ public class Application {
 		props[0].Name = "Hidden";
 		props[0].Value = Boolean.TRUE;
 
-		XComponent xComp = xCompLoader.loadComponentFromURL(docURL, "_blank", 0, props);
+		XComponent xComp = xCompLoader.loadComponentFromURL(templateURL, "_blank", 0, props);
 		xDoc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
 	}
 
-	/**
-	 * Закрывает документ.
-	 */
-	private void closeDocument() throws Exception {
-        String outURL;
-        if (outPath != null) {
-			outURL = Path.of(outPath)
-					.toAbsolutePath()
-					.toUri()
-					.toString();
-		} else {
-			outURL = null;
-		}
-
+	private void saveDocument() throws Exception {
+		String outputURL = getURI(outputPath, false);
 		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
-		if (outURL == null) {
-			xStorable.store();
-		} else {
-			PropertyValue[] props = new PropertyValue[0];
-			xStorable.storeAsURL(outURL, props);
+
+		if (embedFonts) {
+			XMultiServiceFactory xMSF = UnoRuntime
+					.queryInterface(XMultiServiceFactory.class, xDoc);
+			XPropertySet xDocSettings = UnoRuntime.queryInterface(
+					XPropertySet.class,
+					xMSF.createInstance("com.sun.star.text.DocumentSettings")
+			);
+			xDocSettings.setPropertyValue("EmbedFonts", true);
+			xDocSettings.setPropertyValue("EmbedOnlyUsedFonts", true);
 		}
+		xStorable.storeAsURL(outputURL, new PropertyValue[0]);
 	}
 
 	/**
 	 * Завершает приложение.
+	 *
+	 * FIXME: приложение закрывается вместе со всем Либреофисом.
 	 */
 	public void terminate() {
 		if (this.success) {
 			try {
-				this.closeDocument();
+				this.saveDocument();
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
