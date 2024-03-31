@@ -1,4 +1,4 @@
-package ru.danilakondr.gostproc.processing;
+package ru.danilakondr.templater.processing;
 
 import com.sun.star.text.XTextDocument;
 

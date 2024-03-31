@@ -1,4 +1,4 @@
-package ru.danilakondr.gostproc.fonts;
+package ru.danilakondr.templater.fonts;
 
 
 import org.kohsuke.args4j.CmdLineException;

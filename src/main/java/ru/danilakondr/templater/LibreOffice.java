@@ -1,15 +1,13 @@
-package ru.danilakondr.gostproc;
+package ru.danilakondr.templater;
 
 import com.sun.star.uno.XComponentContext;
 import ooo.connector.BootstrapSocketConnector;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.io.IOException;
 
 import org.apache.commons.lang3.SystemUtils;

@@ -1,4 +1,4 @@
-package ru.danilakondr.gostproc;
+package ru.danilakondr.templater;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
@@ -12,7 +12,7 @@ import java.io.FileNotFoundException;
 import java.lang.Exception;
 
 import org.kohsuke.args4j.*;
-import ru.danilakondr.gostproc.processing.*;
+import ru.danilakondr.templater.processing.*;
 
 /**
  * Главный класс постобработчика документов с использованием LibreOffice.

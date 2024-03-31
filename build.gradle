@@ -5,7 +5,7 @@ plugins {
     id 'application'
 }
 
-group = 'ru.danilakondr.gostproc'
+group = 'ru.danilakondr.templater'
 version = '0.1.5'
 
 repositories {
@@ -28,7 +28,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'ru.danilakondr.gostproc.Application'
+    mainClass = 'ru.danilakondr.templater.Application'
 }
 
 tasks.register('findLibreOffice', Copy) {

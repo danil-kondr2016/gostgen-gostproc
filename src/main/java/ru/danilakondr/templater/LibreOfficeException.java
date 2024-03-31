@@ -1,4 +1,4 @@
-package ru.danilakondr.gostproc;
+package ru.danilakondr.templater;
 
 /**
  * Исключение при нахождении LibreOffice.
