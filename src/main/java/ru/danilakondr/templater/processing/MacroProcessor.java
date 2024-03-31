@@ -13,11 +13,29 @@ import java.util.Set;
 
 import org.apache.commons.text.StringSubstitutor;
 
+/**
+ * Класс, обрабатывающий макросы, разворачивающиеся в строки.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.2.1
+ */
 public class MacroProcessor extends Processor {
     private final Macros macros;
     private final StringSubstitutor substitutor;
     private static final Set<String> FORBIDDEN_MACROS = Set.of("%TOC%", "%MAIN_TEXT%");
 
+    /**
+     * Определяет, является ли макрос запрещённым для строковой подстановки.
+     * Запрещённые макросы обрабатываются отдельно другими классами:
+     *
+     * <ul>
+     *     <li><code>%INCLUDE(...)%</code>, <code>%MAIN_TEXT%</code>: <code>DocumentIncluder</code></li>
+     *     <li><code>%TOC%</code>: <code>TableOfContentsProcessor<code/></li>
+     * </ul>
+     * @param macro макрос, нуждающийся в проверке
+     * @return является ли макрос запрещённым
+     * @since 0.2.2
+     */
     private static boolean isForbiddenMacro(String macro) {
         if (FORBIDDEN_MACROS.contains(macro))
             return true;
@@ -55,6 +73,12 @@ public class MacroProcessor extends Processor {
         }
     }
 
+    /**
+     * Обрабатывает один макрос в заданном месте.
+     *
+     * @param xRange место, где находится макрос
+     * @since 0.2.1
+     */
     private void processSingleProperty(XTextRange xRange) throws Exception {
         String macro = xRange.getString().trim();
         boolean containsKey = macros.containsKey(macro.replaceAll("%(.*?)%", "$1"));
