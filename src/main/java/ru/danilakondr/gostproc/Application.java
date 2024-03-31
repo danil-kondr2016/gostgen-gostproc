@@ -6,12 +6,16 @@ import com.sun.star.frame.*;
 import com.sun.star.uno.*;
 import com.sun.star.lang.*;
 
+import java.awt.*;
 import java.io.File;
 import java.lang.Exception;
 import java.lang.RuntimeException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.kohsuke.args4j.*;
+import ru.danilakondr.gostproc.fonts.FontTriple;
+import ru.danilakondr.gostproc.fonts.FontTripleHandler;
 import ru.danilakondr.gostproc.processing.*;
 
 /**
@@ -31,6 +35,9 @@ public class Application {
 	@Option(name="-h", aliases={"--help", "-?"})
 	private boolean help;
 
+	@Option(name="-f", aliases={"--font-triple"}, handler=FontTripleHandler.class, usage="Specify triple of fonts: serif;sans;monospace")
+	private FontTriple fonts;
+
 	private String docURL;
     private XDesktop xDesktop;
 	private XTextDocument xDoc;
@@ -49,6 +56,10 @@ public class Application {
 	}
 
 	public static void main(String[] args) {
+		OptionHandlerRegistry
+				.getRegistry()
+				.registerHandler(FontTriple.class, FontTripleHandler.class);
+
 		Application app = new Application();
 		CmdLineParser parser = new CmdLineParser(app);
 		try {
@@ -97,11 +108,17 @@ public class Application {
 	 * Запуск приложения.
 	 */
 	public void run() throws Exception {
+		if (fonts == null) {
+			fonts = FontTriple.provide();
+		}
+		if (fonts != null && !fonts.exists()) {
+			throw new Exception("Font triple \"" + fonts.toString() + "\" don't exists");
+		}
 		this.createDesktop();
 		this.loadDocument();
 
 		new DocumentIncluder(xDoc).process();
-		new ParagraphStyleProcessor(xDoc).process();
+		new ParagraphStyleProcessor(xDoc, fonts).process();
 		new OutlineStyleProcessor(xDoc).process();
 		new PageStyleProcessor(xDoc).process();
 		new MathFormulaProcessor(xDoc).process();

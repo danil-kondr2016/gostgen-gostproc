@@ -8,6 +8,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.beans.XPropertySet;
+import ru.danilakondr.gostproc.fonts.FontTriple;
 
 /**
  * Установщик стилей абзацев. Оформляет стили абзацев в соответствии с
@@ -18,6 +19,7 @@ import com.sun.star.beans.XPropertySet;
  */
 public class ParagraphStyleProcessor extends Processor {
     private final XNameAccess xParagraphStyles;
+    private final FontTriple fonts;
 
     /**
      * Тип выравнивания.
@@ -26,8 +28,10 @@ public class ParagraphStyleProcessor extends Processor {
         LEFT, PARAGRAPH, HEADING, CENTER, RIGHT
     }
 
-    public ParagraphStyleProcessor(XTextDocument xDoc) {
+    public ParagraphStyleProcessor(XTextDocument xDoc, FontTriple fonts) {
         super(xDoc);
+
+        this.fonts = fonts;
 
         XStyleFamiliesSupplier xStyleSup = UnoRuntime.queryInterface(
                 XStyleFamiliesSupplier.class,
@@ -73,6 +77,7 @@ public class ParagraphStyleProcessor extends Processor {
     private void setStandardParagraphStyle() throws Exception {
         XPropertySet xStyleProp = getStyleProperties("Standard");
         xStyleProp.setPropertyValue("CharHeight", 14.0f);
+        xStyleProp.setPropertyValue("CharFontName", fonts.serif);
     }
 
     private XPropertySet getStyleProperties(String styleName) throws Exception {
@@ -116,7 +121,7 @@ public class ParagraphStyleProcessor extends Processor {
         xStyleProp.setPropertyValue("ParaWidows", (byte)0);
 
         xStyleProp.setPropertyValue("CharHeight", 14.0f);
-        xStyleProp.setPropertyValue("CharFontName", "Liberation Serif");
+        xStyleProp.setPropertyValue("CharFontName", fonts.serif);
 
         xStyleProp.setPropertyValue("CharWeight", bold ? FontWeight.BOLD : FontWeight.NORMAL);
         xStyleProp.setPropertyValue("CharPosture", FontSlant.NONE);
