@@ -15,11 +15,11 @@ import com.sun.star.util.XSearchable;
  * @author Данила А. Кондратенко
  * @since 0.1.0
  */
-public class TableOfContentsProcessor extends Processor {
+public class TableOfContentsInserter extends Processor {
     private final XText xText;
     private final XParagraphCursor xCursor;
 
-    public TableOfContentsProcessor(XTextDocument xDoc) {
+    public TableOfContentsInserter(XTextDocument xDoc) {
         super(xDoc);
 
         this.xText = xDoc.getText();
@@ -31,7 +31,7 @@ public class TableOfContentsProcessor extends Processor {
      * Метод обработки. Ищет первое вхождение %TOC% и вставляет на его
      * место оглавление.
      *
-     * @see TableOfContentsProcessor#putTableOfContents
+     * @see TableOfContentsInserter#putTableOfContents
      */
     @Override
     public void process() throws Exception {
@@ -64,7 +64,7 @@ public class TableOfContentsProcessor extends Processor {
 
     /**
      * Непосредственно создаёт и помещает объект оглавления в указанном месте.
-     * @see TableOfContentsProcessor#createIndex
+     * @see TableOfContentsInserter#createIndex
      * @param cursor указатель на место вставки
      */
     private void putTableOfContents(XTextCursor cursor) throws Exception {

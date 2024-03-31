@@ -30,7 +30,7 @@ public class MacroProcessor extends Processor {
      *
      * <ul>
      *     <li><code>%INCLUDE(...)%</code>, <code>%MAIN_TEXT%</code>: <code>DocumentIncluder</code></li>
-     *     <li><code>%TOC%</code>: <code>TableOfContentsProcessor<code/></li>
+     *     <li><code>%TOC%</code>: <code>TableOfContentsInserter<code/></li>
      * </ul>
      * @param macro макрос, нуждающийся в проверке
      * @return является ли макрос запрещённым

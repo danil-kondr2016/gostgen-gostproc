@@ -105,12 +105,13 @@ public class Application {
 	 * Запуск приложения.
 	 */
 	public void run() throws Exception {
+		this.createDesktop();
+
 		String mainTextURL = getURI(mainTextPath, true);
 		if (mainTextURL == null) {
 			throw new FileNotFoundException(mainTextPath);
 		}
 
-		this.createDesktop();
 		this.loadTemplate();
 
 		new DocumentIncluder(xDoc, mainTextURL).process();
@@ -123,7 +124,7 @@ public class Application {
 				System.err.printf("File %s not found, skipping\n", macroFile);
 			}
 		}
-		new TableOfContentsProcessor(xDoc).process();
+		new TableOfContentsInserter(xDoc).process();
 
 		this.success = true;
 	}

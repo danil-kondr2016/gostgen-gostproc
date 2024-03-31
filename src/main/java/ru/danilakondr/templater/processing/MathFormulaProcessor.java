@@ -50,6 +50,7 @@ public class MathFormulaProcessor extends Processor {
      * <code>MATH_FORMULA_GUID</code>.
      *
      * @see MathFormulaProcessor#processFormula
+     * @see MathFormulaProcessor#MATH_FORMULA_GUID
      */
     @Override
     public void process() throws Exception {

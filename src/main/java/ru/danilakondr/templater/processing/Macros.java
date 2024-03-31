@@ -18,6 +18,12 @@ public class Macros extends HashMap<String, String> {
         loadFile(path);
     }
 
+    /**
+     * Загружает и обрабатывает файл по заданному пути.
+     *
+     * @param path путь к файлу
+     * @throws IOException ошибка при считывании
+     */
     private void loadFile(String path) throws IOException {
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(path)));
@@ -34,6 +40,11 @@ public class Macros extends HashMap<String, String> {
         }
     }
 
+    /**
+     * Добавляет переменную из одной строки.
+     *
+     * @param line строка
+     */
     private void addVariable(String line) {
         int eqIndex = line.indexOf('=');
         if (eqIndex > 0) {
