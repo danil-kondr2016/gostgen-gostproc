@@ -3,6 +3,7 @@ package ru.danilakondr.gostproc.processing;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.document.XDocumentInsertable;
+import com.sun.star.io.IOException;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -27,13 +28,17 @@ import java.util.regex.Pattern;
  */
 public class DocumentIncluder extends Processor {
     private static final int INCLUDE_DEPTH_LIMIT = 16;
-    public DocumentIncluder(XTextDocument xDoc) {
+    private String mainTextURL;
+
+    public DocumentIncluder(XTextDocument xDoc, String mainTextURL) {
         super(xDoc);
+        this.mainTextURL = mainTextURL;
     }
 
     public void process() throws Exception {
-        int i;
-        for (i = 0; i < INCLUDE_DEPTH_LIMIT; i++) {
+        insertMainText();
+
+        for (int i = 0; i < INCLUDE_DEPTH_LIMIT; i++) {
             if (!processSingleLevel())
                 break;
         }
@@ -47,6 +52,21 @@ public class DocumentIncluder extends Processor {
         if (xS.findFirst(xSD) != null) {
             throw new Exception("%INCLUDE% nested too deeply; maximal depth is " + INCLUDE_DEPTH_LIMIT);
         }
+    }
+
+    private void insertMainText() throws Exception {
+        XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
+        XSearchDescriptor xSD = xS.createSearchDescriptor();
+
+        xSD.setSearchString("%MAIN\\_TEXT%");
+        xSD.setPropertyValue("SearchRegularExpression", true);
+
+        Object oFound = xS.findFirst(xSD);
+        XTextRange xFound = UnoRuntime.queryInterface(
+                XTextRange.class,
+                oFound
+        );
+        insertDocument(mainTextURL, xFound);
     }
 
     private boolean processSingleLevel() throws Exception {
@@ -76,8 +96,6 @@ public class DocumentIncluder extends Processor {
         Pattern macro = Pattern.compile("%INCLUDE\\((.*)\\)%");
         String include = macro.matcher(xRange.getString()).replaceAll("$1");
 
-        System.out.printf("processSingleInclude: %s -> %s\n", xRange.getString(), include);
-
         File f = new File(include).getAbsoluteFile();
         if (!f.exists()) {
             System.err.printf("File %s not found. Skipping.\n", f);
@@ -85,10 +103,13 @@ public class DocumentIncluder extends Processor {
         }
 
         String url = f.toURI().toString();
-        XTextCursor xCursor = xDoc.getText().createTextCursorByRange(xRange);
-        xCursor.gotoRange(xRange, true);
+        insertDocument(url, xRange);
+    }
+
+    private void insertDocument(String url, XTextRange at) throws Exception {
+        XTextCursor xCursor = xDoc.getText().createTextCursorByRange(at);
+        xCursor.gotoRange(at, true);
         XDocumentInsertable xInsertable = UnoRuntime.queryInterface(XDocumentInsertable.class, xCursor);
-        PropertyValue[] p = new PropertyValue[0];
-        xInsertable.insertDocumentFromURL(url, p);
+        xInsertable.insertDocumentFromURL(url, new PropertyValue[0]);
     }
 }

@@ -24,7 +24,7 @@ public class Application {
 	@Option(name="-t", aliases={"--template"}, usage="Template file", required = true)
 	private String templatePath;
 
-	@Option(name="-m", aliases={"--main-text"}, usage="Main text file", required = false)
+	@Option(name="-m", aliases={"--main-text"}, usage="Main text file", required = true)
 	private String mainTextPath;
 
 	@Option(name="-o", aliases={"--output"}, usage="Output file", required = true)
@@ -101,10 +101,15 @@ public class Application {
 	 * Запуск приложения.
 	 */
 	public void run() throws Exception {
+		String mainTextURL = getURI(mainTextPath, true);
+		if (mainTextURL == null) {
+			throw new FileNotFoundException(mainTextPath);
+		}
+
 		this.createDesktop();
 		this.loadTemplate();
 
-		new DocumentIncluder(xDoc).process();
+		new DocumentIncluder(xDoc, mainTextURL).process();
 		new MathFormulaProcessor(xDoc).process();
 		new TableOfContentsProcessor(xDoc).process();
 
@@ -132,7 +137,7 @@ public class Application {
 	private void loadTemplate() throws Exception {
 		String templateURL = getURI(templatePath, true);
 		if (templateURL == null)
-			throw new FileNotFoundException();
+			throw new FileNotFoundException(templatePath);
 
 		XComponentLoader xCompLoader = UnoRuntime
 				.queryInterface(XComponentLoader.class, xDesktop);
