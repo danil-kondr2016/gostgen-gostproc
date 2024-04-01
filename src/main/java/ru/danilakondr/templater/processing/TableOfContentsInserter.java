@@ -35,6 +35,7 @@ public class TableOfContentsInserter extends Processor {
      */
     @Override
     public void process() throws Exception {
+        System.out.println("Inserting Table of Contents...");
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
 

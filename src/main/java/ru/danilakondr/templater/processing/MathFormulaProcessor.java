@@ -5,6 +5,7 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.document.XEmbeddedObjectSupplier;
 import com.sun.star.text.*;
 import com.sun.star.uno.UnoRuntime;
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * Обработчик объектов, которые содержат в себе математические формулы
@@ -68,6 +69,9 @@ public class MathFormulaProcessor extends Processor {
         XPropertySet xPropertySet = UnoRuntime
                 .queryInterface(XPropertySet.class, oFormula);
         String sFormula = (String)xPropertySet.getPropertyValue("Formula");
+
+        System.out.printf("Processing formula \"%s\"...\n",
+                StringEscapeUtils.escapeJava(sFormula));
 
         xPropertySet.setPropertyValue("Formula", StarMathFixer.fixFormula(sFormula));
         // Здесь стоит всё-таки подумать над тем, как правильно

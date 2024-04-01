@@ -38,6 +38,7 @@ public class DocumentIncluder extends Processor {
     }
 
     public void process() throws Exception {
+        System.out.println("Processing include directives...");
         insertMainText();
 
         for (int i = 0; i < INCLUDE_DEPTH_LIMIT; i++) {
@@ -71,6 +72,7 @@ public class DocumentIncluder extends Processor {
      * @since 0.2.0
      */
     private void insertMainText() throws Exception {
+        System.out.println("Inserting main text...");   
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
 
@@ -140,6 +142,7 @@ public class DocumentIncluder extends Processor {
      * @since 0.2.0
      */
     private void insertDocument(String url, XTextRange at) throws Exception {
+        System.out.printf("Including %s\n", url);
         XTextCursor xCursor = xDoc.getText().createTextCursorByRange(at);
         xCursor.gotoRange(at, true);
         XDocumentInsertable xInsertable = UnoRuntime.queryInterface(XDocumentInsertable.class, xCursor);

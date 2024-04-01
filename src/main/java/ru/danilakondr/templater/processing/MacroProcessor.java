@@ -77,6 +77,8 @@ public class MacroProcessor extends Processor {
         String macro = xRange.getString().trim();
         boolean containsKey = substitutor.getStringLookup().lookup(macro.replaceAll("%(.*?)%", "$1")) != null;
 
+        System.out.printf("Processing macro %s...\n", xRange.getString());
+
         if (!containsKey && !isForbiddenMacro(macro)) {
             System.err.printf("Macro %s has not been specified, skipping\n", macro);
             return;
