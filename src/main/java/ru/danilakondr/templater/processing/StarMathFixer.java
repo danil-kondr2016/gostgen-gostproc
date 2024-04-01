@@ -1,5 +1,6 @@
 package ru.danilakondr.templater.processing;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,11 +21,11 @@ public class StarMathFixer {
     /**
      * Регулярное выражение для обрыва выражения слева
      */
-    private static final Pattern left = Pattern.compile("#\\s*([*/&|=<>]|cdot|times|div)");
+    private static final Pattern left = Pattern.compile("([#{])\\s*([*/&|=<>]|cdot|times|div)");
     /**
      * Регулярное выражение для обрыва выражения справа
      */
-    private static final Pattern right = Pattern.compile("([\\\\+\\-/&|=<>]|cdot|times|div|plusminus|minusplus)\\s*#");
+    private static final Pattern right = Pattern.compile("([\\\\+\\-/&|=<>]|cdot|times|div|plusminus|minusplus)\\s*([#}])");
 
     private static final int LATIN_ALPHABET_SIZE = 26;
 
@@ -62,6 +63,39 @@ public class StarMathFixer {
             "%iepsilon", "%ivartheta", null, "%iphi", "%ivarrho", "%ivarpi"
     };
 
+    private static class ReplacePair {
+        public final Pattern a;
+        public final String b;
+
+
+        private ReplacePair(Pattern a, String b) {
+            this.a = a;
+            this.b = b;
+        }
+    }
+
+    private static final ReplacePair[] accentsReplacement = new ReplacePair[]{
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0300"), "\\{grave $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0301"), "\\{acute $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0302"), "\\{hat $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0303"), "\\{tilde $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0304"), "\\{bar $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0305"), "\\{widebar $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0306"), "\\{breve $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0307"), "\\{dot $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0308"), "\\{ddot $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u030A"), "\\{circle $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u030C"), "\\{check $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u035E"), "\\{overline $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u035F"), "\\{underline $1\\}"),
+            new ReplacePair(Pattern.compile("(\\s*.{1,2}\\s*)csup\\s*\\u0360"), "\\{widetilde $1\\}"),
+    };
+
+    private static final ReplacePair[] bracesReplacement = new ReplacePair[] {
+            new ReplacePair(Pattern.compile("left\\s+mline"), "left lline"),
+            new ReplacePair(Pattern.compile("right\\s+mline"), "right rline"),
+    };
+
     /**
      * Обрабочик одной формулы на языке StarMath.
      *
@@ -69,10 +103,10 @@ public class StarMathFixer {
      */
     public static String fixFormula(String formula) {
         Matcher lMatch = left.matcher(formula);
-        String sFormula1 = lMatch.replaceAll("# {} $1");
+        String sFormula1 = lMatch.replaceAll("$1 {} $2");
 
         Matcher rMatch = right.matcher(sFormula1);
-        String sFormula2 = rMatch.replaceAll("$1 {} #");
+        String sFormula2 = rMatch.replaceAll("$1 {} $2");
 
         return fixCharacters(sFormula2);
     }
@@ -86,6 +120,8 @@ public class StarMathFixer {
         final int CODEPOINT_BOLD_ITALIC_SMALL_A = 119938;
 
         String f = formula;
+        f = fixAccents(f);
+        f = fixBraces(f);
         f = fixLatinAlphabet(f, CODEPOINT_BOLD_CAPITAL_A, CODEPOINT_BOLD_SMALL_A, "{bold nitalic %c}");
         f = fixLatinAlphabet(f, CODEPOINT_ITALIC_CAPITAL_A, CODEPOINT_ITALIC_SMALL_A, "{italic %c}");
         f = fixLatinAlphabet(f, CODEPOINT_BOLD_ITALIC_CAPITAL_A, CODEPOINT_BOLD_ITALIC_SMALL_A, "{bold italic %c}");
@@ -98,6 +134,25 @@ public class StarMathFixer {
         f = fixGreekSmalls(f, true, false);
         f = fixGreekSmalls(f, true, true);
         return f;
+    }
+
+    private static String fixBraces(String f) {
+        String x = f;
+
+        for (ReplacePair p : bracesReplacement) {
+            x = p.a.matcher(x).replaceAll(p.b);
+        }
+        return x;
+    }
+
+    private static String fixAccents(String f) {
+        String x = f;
+
+        for (ReplacePair p : accentsReplacement) {
+            x = p.a.matcher(x).replaceAll(p.b);
+        }
+
+        return x;
     }
 
     private static String fixLatinAlphabet(String f, int firstCapital, int firstSmall, String replace) {
@@ -139,7 +194,7 @@ public class StarMathFixer {
                 capital = Character.toString(0x1D71C + i);
 
             String capReplacement = (bold ? "bold " : "") + (!italic ? greekCapital[i] : greekItalicCapital[i]);
-            x = x.replace(capital, capReplacement);
+            x = x.replace(capital, "{" + capReplacement + "}");
         }
 
         return x;
@@ -171,7 +226,7 @@ public class StarMathFixer {
                 small = Character.toString(0x1D736 + i);
 
             String smallReplacement = (bold ? "bold " : "") + (!italic ? greekSmall[i] : greekItalicSmall[i]);
-            x = x.replace(small, smallReplacement);
+            x = x.replace(small, "{" + smallReplacement + "}");
         }
 
         return x;
