@@ -1,7 +1,14 @@
 package ru.danilakondr.templater.processing;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
+
+import org.apache.commons.text.lookup.StringLookup;
 
 /**
  * Велосипед для обработки файлов с макросами.
@@ -9,13 +16,17 @@ import java.util.HashMap;
  * @author Данила А. Кондратенко
  * @since 0.2.1
  */
-public class Macros extends HashMap<String, String> {
+public class Macros extends HashMap<String, String> implements StringLookup {
     public Macros(File f) throws IOException {
         this(f.getPath());
     }
     public Macros(String path) throws IOException {
         super();
-        loadFile(path);
+        loadFromFile(path);
+    }
+
+    public Macros() {
+        super();
     }
 
     /**
@@ -24,7 +35,7 @@ public class Macros extends HashMap<String, String> {
      * @param path путь к файлу
      * @throws IOException ошибка при считывании
      */
-    private void loadFile(String path) throws IOException {
+    public void loadFromFile(String path) throws IOException {
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(path)));
 
@@ -53,5 +64,30 @@ public class Macros extends HashMap<String, String> {
                     line.substring(eqIndex+1).trim()
             );
         }
+    }
+
+    @Override
+    public String lookup(String s) {
+        Calendar cal = Calendar.getInstance();
+        Date date = cal.getTime();
+
+        if (s.compareTo("YEAR") == 0)
+            return String.format("%04d", cal.get(Calendar.YEAR));
+        if (s.compareTo("DATE") == 0)
+            return SimpleDateFormat.getDateInstance(DateFormat.SHORT).format(date);
+        if (s.compareTo("TIME") == 0)
+            return SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(date);
+        if (s.compareTo("DATETIME") == 0)
+            return SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date);
+
+        if (s.matches("DATETIME\\((.*?)\\)"))
+            return formatDateTime(s, cal);
+
+        return get(s);
+    }
+
+    private String formatDateTime(String s, Calendar cal) {
+        DateFormat fmt = new SimpleDateFormat(s.replaceAll("DATETIME\\((.*?)\\)", "$1"));
+        return fmt.format(cal.getTime());
     }
 }

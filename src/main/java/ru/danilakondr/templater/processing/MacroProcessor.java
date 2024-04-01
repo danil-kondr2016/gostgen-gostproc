@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.apache.commons.text.StringSubstitutor;
+import org.apache.commons.text.lookup.StringLookup;
 
 /**
  * Класс, обрабатывающий макросы, разворачивающиеся в строки.
@@ -48,17 +49,13 @@ public class MacroProcessor extends Processor {
 
     public MacroProcessor(XTextDocument xDoc, String varFile) throws IOException {
         super(xDoc);
-        this.macros = new Macros(varFile);
-        this.substitutor = new StringSubstitutor(this.macros);
-        this.substitutor.setVariablePrefix('%').setVariableSuffix('%');
+        this.macros = new Macros();
+        this.macros.loadFromFile(varFile);
+        this.substitutor = new StringSubstitutor((StringLookup) this.macros, "%", "%", '%');
     }
 
     @Override
     public void process() throws Exception {
-        this.macros.forEach((k, v) -> {
-            System.err.printf("%s: %s\n", k, v);
-        });
-
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
 
@@ -81,7 +78,7 @@ public class MacroProcessor extends Processor {
      */
     private void processSingleProperty(XTextRange xRange) throws Exception {
         String macro = xRange.getString().trim();
-        boolean containsKey = macros.containsKey(macro.replaceAll("%(.*?)%", "$1"));
+        boolean containsKey = macros.lookup(macro.replaceAll("%(.*?)%", "$1")) != null;
 
         if (!containsKey && !isForbiddenMacro(macro)) {
             System.err.printf("Macro %s has not been specified, skipping\n", macro);
@@ -91,7 +88,6 @@ public class MacroProcessor extends Processor {
             System.err.printf("Macro %s cannot be overridden, skipping\n", macro);
             return;
         }
-
 
         String value = substitutor.replace(xRange.getString());
         XTextCursor xCursor = xDoc.getText().createTextCursorByRange(xRange);
