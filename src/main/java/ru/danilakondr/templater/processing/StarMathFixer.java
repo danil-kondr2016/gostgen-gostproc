@@ -33,7 +33,7 @@ public class StarMathFixer {
             "%ZETA", "%ETA", "%THETA", "%IOTA", "%KAPPA",
             "%LAMBDA", "%MU", "%NU", "%XI", "%OMICRON",
             "%PI", "%RHO", null, "%SIGMA", "%TAU", "%UPSILON",
-            "%PHI", "%CHI", "%PSI", "%OMEGA"
+            "%PHI", "%CHI", "%PSI", "%OMEGA", "%NABLA"
     };
 
     private static final String[] greekItalicCapital = new String[]{
@@ -41,7 +41,7 @@ public class StarMathFixer {
             "%iZETA", "%iETA", "%iTHETA", "%iIOTA", "%iKAPPA",
             "%iLAMBDA", "%iMU", "%iNU", "%iXI", "%iOMICRON",
             "%iPI", "%iRHO", null, "%iSIGMA", "%iTAU", "%iUPSILON",
-            "%iPHI", "%iCHI", "%iPSI", "%iOMEGA"
+            "%iPHI", "%iCHI", "%iPSI", "%iOMEGA", "italic %NABLA"
     };
 
     private static final String[] greekSmall = new String[]{
@@ -121,7 +121,7 @@ public class StarMathFixer {
                 0x0391, 0x0392, 0x0393, 0x0394, 0x0395, 0x0396, 0x0397, 0x0398,
                 0x0399, 0x039A, 0x039B, 0x039C, 0x039D, 0x039E, 0x039F, 0x03A0,
                 0x03A1, 0x03F4, 0x03A3, 0x03A4, 0x03A5, 0x03A6, 0x03A7, 0x03A8,
-                0x03A9
+                0x03A9, 0x2207
         };
 
         for (int i = 0; i < greekCapital.length; i++) {
