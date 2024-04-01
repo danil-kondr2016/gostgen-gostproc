@@ -47,10 +47,9 @@ public class MacroProcessor extends Processor {
         return false;
     }
 
-    public MacroProcessor(XTextDocument xDoc, String varFile) throws IOException {
+    public MacroProcessor(XTextDocument xDoc, Macros macros) throws IOException {
         super(xDoc);
-        this.macros = new Macros();
-        this.macros.loadFromFile(varFile);
+        this.macros = macros;
         this.substitutor = new StringSubstitutor((StringLookup) this.macros, "%", "%", '%');
     }
 

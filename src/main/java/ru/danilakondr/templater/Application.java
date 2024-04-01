@@ -39,6 +39,7 @@ public class Application {
 	@Option(name="-h", aliases=	{"--help", "-?"})
 	private boolean help;
 
+	private final Macros macros;
     private XDesktop xDesktop;
 	private XTextDocument xDoc;
 	private XComponentContext xContext;
@@ -49,6 +50,7 @@ public class Application {
 		this.xContext = null;
 		this.xMCF = null;
 		this.macroFile = null;
+		this.macros = new Macros();
 	}
 
 	public void setContext(XComponentContext xContext) {
@@ -118,12 +120,13 @@ public class Application {
 		new MathFormulaProcessor(xDoc).process();
 		if (macroFile != null) {
 			if (new File(macroFile).exists()) {
-				new MacroProcessor(xDoc, macroFile).process();
+				macros.loadFromFile(macroFile);
 			}
 			else {
 				System.err.printf("File %s not found, skipping\n", macroFile);
 			}
 		}
+		new MacroProcessor(xDoc, macros).process();
 		new TableOfContentsInserter(xDoc).process();
 
 		this.success = true;
