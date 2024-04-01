@@ -49,7 +49,7 @@ public class StarMathFixer {
             "%zeta", "%eta", "%theta", "%iota", "%kappa",
             "%lambda", "%mu", "%nu", "%xi", "%omicron",
             "%pi", "%rho", "%varsigma", "%sigma", "%tau", "%upsilon",
-            "%varphi", "%chi", "%psi", "%omega", null,
+            "%varphi", "%chi", "%psi", "%omega", "partial",
             "%epsilon", "%vartheta", null, "%phi", "%varrho", "%varpi"
     };
 
@@ -58,7 +58,7 @@ public class StarMathFixer {
             "%izeta", "%ieta", "%itheta", "%iiota", "%ikappa",
             "%ilambda", "%imu", "%inu", "%ixi", "%iomicron",
             "%ipi", "%irho", "%ivarsigma", "%isigma", "%itau", "%iupsilon",
-            "%ivarphi", "%ichi", "%ipsi", "%iomega", null,
+            "%ivarphi", "%ichi", "%ipsi", "%iomega", "partial",
             "%iepsilon", "%ivartheta", null, "%iphi", "%ivarrho", "%ivarpi"
     };
 
@@ -138,8 +138,8 @@ public class StarMathFixer {
             else if (bold && italic)
                 capital = Character.toString(0x1D71C + i);
 
-            String capReplacement = !italic ? greekCapital[i] : greekItalicCapital[i];
-            x = x.replace(capital, capReplacement != null ? capReplacement : "");
+            String capReplacement = (bold ? "bold " : "") + (!italic ? greekCapital[i] : greekItalicCapital[i]);
+            x = x.replace(capital, capReplacement);
         }
 
         return x;
@@ -153,7 +153,7 @@ public class StarMathFixer {
                 0x03B1, 0x03B2, 0x03B3, 0x03B4, 0x03B5, 0x03B6, 0x03B7, 0x03B8,
                 0x03B9, 0x03BA, 0x03BB, 0x03BC, 0x03BD, 0x03BE, 0x03BF, 0x03C0,
                 0x03C1, 0x03C2, 0x03C3, 0x03C4, 0x03C5, 0x03C6, 0x03C7, 0x03C8,
-                0x03C9, -1,     0x03F5, 0x03D1, 0x03F0, 0x03D5, 0x03F1, 0x03D6
+                0x03C9, 0x2202, 0x03F5, 0x03D1, 0x03F0, 0x03D5, 0x03F1, 0x03D6
         };
 
         for (int i = 0; i < greekSmall.length; i++) {
@@ -170,8 +170,8 @@ public class StarMathFixer {
             else if (bold && italic)
                 small = Character.toString(0x1D736 + i);
 
-            String smallReplacement = !italic ? greekSmall[i] : greekItalicSmall[i];
-            x = x.replace(small, smallReplacement != null ? smallReplacement : "");
+            String smallReplacement = (bold ? "bold " : "") + (!italic ? greekSmall[i] : greekItalicSmall[i]);
+            x = x.replace(small, smallReplacement);
         }
 
         return x;
