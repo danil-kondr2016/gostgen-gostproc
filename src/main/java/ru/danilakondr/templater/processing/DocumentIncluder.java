@@ -45,15 +45,23 @@ public class DocumentIncluder extends Processor {
                 break;
         }
 
+        if (findAllIncludes().hasElements()) {
+            throw new Exception("%INCLUDE% nested too deeply; maximal depth is " + INCLUDE_DEPTH_LIMIT);
+        }
+    }
+
+    /**
+     * Ищет все представленные в тексте <code>%INCLUDE(...)%</code>.
+     * @return последовательность всех мест, где встречается макрос
+     */
+    private XIndexAccess findAllIncludes() throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
 
         xSD.setSearchString("%INCLUDE\\(.*\\)%");
         xSD.setPropertyValue("SearchRegularExpression", true);
 
-        if (xS.findFirst(xSD) != null) {
-            throw new Exception("%INCLUDE% nested too deeply; maximal depth is " + INCLUDE_DEPTH_LIMIT);
-        }
+        return xS.findAll(xSD);
     }
 
     /**
@@ -86,13 +94,7 @@ public class DocumentIncluder extends Processor {
      * @since 0.1.5
      */
     private boolean processSingleLevel() throws Exception {
-        XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
-        XSearchDescriptor xSD = xS.createSearchDescriptor();
-
-        xSD.setSearchString("%INCLUDE\\(.*\\)%");
-        xSD.setPropertyValue("SearchRegularExpression", true);
-
-        XIndexAccess found = xS.findAll(xSD);
+        XIndexAccess found = findAllIncludes();
         if (found.getCount() == 0)
             return false;
 
