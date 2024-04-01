@@ -6,18 +6,9 @@ import com.sun.star.document.XEmbeddedObjectSupplier;
 import com.sun.star.text.*;
 import com.sun.star.uno.UnoRuntime;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
- * Обработчик математических формул на языке StarMath. Необходим, чтобы
- * исправить некоторые косяки генератора MathML из LaTeX, который используется
- * в Pandoc: при обработке различного рода уравнений с переносами на следующую
- * строку получается некорректная с точки зрения LibreOffice формула, поскольку
- * с одного из концов у оператора не хватает выражения.
- * <p>
- * Язык StarMath, используемый в LibreOffice, достаточно прост,
- * поэтому были использованы регулярные выражения.
+ * Обработчик объектов, которые содержат в себе математические формулы
+ * LibreOffice.
  *
  * @author Данила А. Кондратенко
  * @since 0.1.0
@@ -29,19 +20,9 @@ public class MathFormulaProcessor extends Processor {
      * @see MathFormulaProcessor#processFormula
      */
     public static final String MATH_FORMULA_GUID = "078B7ABA-54FC-457F-8551-6147e776a997";
-    /**
-     * Регулярное выражение для обрыва выражения слева
-     */
-    private final Pattern left;
-    /**
-     * Регулярное выражение для обрыва выражения справа
-     */
-    private final Pattern right;
+
     public MathFormulaProcessor(XTextDocument xDoc) {
         super(xDoc);
-
-        left = Pattern.compile("#\\s*([*/&|=<>]|cdot|times|div)");
-        right = Pattern.compile("([\\\\+\\-/&|=<>]|cdot|times|div|plusminus|minusplus)\\s*#");
     }
 
     /**
@@ -77,7 +58,7 @@ public class MathFormulaProcessor extends Processor {
     }
 
     /**
-     * Обрабочик одной формулы на языке StarMath.
+     * Обрабочик одного объекта формулы.
      *
      * @param oFormulaSup объект, содержащий в себе формулу
      */
@@ -88,13 +69,7 @@ public class MathFormulaProcessor extends Processor {
                 .queryInterface(XPropertySet.class, oFormula);
         String sFormula = (String)xPropertySet.getPropertyValue("Formula");
 
-        Matcher lMatch = left.matcher(sFormula);
-        String sFormula1 = lMatch.replaceAll("# {} $1");
-
-        Matcher rMatch = right.matcher(sFormula1);
-        String sFormula2 = rMatch.replaceAll("$1 {} #");
-
-        xPropertySet.setPropertyValue("Formula", sFormula2);
+        xPropertySet.setPropertyValue("Formula", StarMathFixer.fixFormula(sFormula));
         // Здесь стоит всё-таки подумать над тем, как правильно
         // обрабатывать шрифты...
     }
