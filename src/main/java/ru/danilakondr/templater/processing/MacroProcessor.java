@@ -21,7 +21,6 @@ import org.apache.commons.text.lookup.StringLookup;
  * @since 0.2.1
  */
 public class MacroProcessor extends Processor {
-    private final Macros macros;
     private final StringSubstitutor substitutor;
     private static final Set<String> FORBIDDEN_MACROS = Set.of("%TOC%", "%MAIN_TEXT%");
 
@@ -47,10 +46,9 @@ public class MacroProcessor extends Processor {
         return false;
     }
 
-    public MacroProcessor(XTextDocument xDoc, Macros macros) throws IOException {
+    public MacroProcessor(XTextDocument xDoc, StringLookup macros) throws IOException {
         super(xDoc);
-        this.macros = macros;
-        this.substitutor = new StringSubstitutor((StringLookup) this.macros, "%", "%", '%');
+        this.substitutor = new StringSubstitutor(macros, "%", "%", '%');
     }
 
     @Override
@@ -65,7 +63,7 @@ public class MacroProcessor extends Processor {
         for (int i = 0; i < xAllFound.getCount(); i++) {
             Object oFound = xAllFound.getByIndex(i);
             XTextRange xFound = UnoRuntime.queryInterface(XTextRange.class, oFound);
-            processSingleProperty(xFound);
+            processSingleMacro(xFound);
         }
     }
 
@@ -75,9 +73,9 @@ public class MacroProcessor extends Processor {
      * @param xRange место, где находится макрос
      * @since 0.2.1
      */
-    private void processSingleProperty(XTextRange xRange) throws Exception {
+    private void processSingleMacro(XTextRange xRange) throws Exception {
         String macro = xRange.getString().trim();
-        boolean containsKey = macros.lookup(macro.replaceAll("%(.*?)%", "$1")) != null;
+        boolean containsKey = substitutor.getStringLookup().lookup(macro.replaceAll("%(.*?)%", "$1")) != null;
 
         if (!containsKey && !isForbiddenMacro(macro)) {
             System.err.printf("Macro %s has not been specified, skipping\n", macro);
