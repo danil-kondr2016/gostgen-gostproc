@@ -17,14 +17,6 @@ import org.apache.commons.text.lookup.StringLookup;
  * @since 0.2.1
  */
 public class Macros extends HashMap<String, String> implements StringLookup {
-    public Macros(File f) throws IOException {
-        this(f.getPath());
-    }
-    public Macros(String path) throws IOException {
-        super();
-        loadFromFile(path);
-    }
-
     public Macros() {
         super();
     }
@@ -74,20 +66,19 @@ public class Macros extends HashMap<String, String> implements StringLookup {
         if (s.compareTo("YEAR") == 0)
             return String.format("%04d", cal.get(Calendar.YEAR));
         if (s.compareTo("DATE") == 0)
-            return SimpleDateFormat.getDateInstance(DateFormat.SHORT).format(date);
+            return SimpleDateFormat.getDateInstance(DateFormat.SHORT)
+                    .format(date);
         if (s.compareTo("TIME") == 0)
-            return SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(date);
+            return SimpleDateFormat.getTimeInstance(DateFormat.SHORT)
+                    .format(date);
         if (s.compareTo("DATETIME") == 0)
-            return SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date);
+            return SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                    .format(date);
 
         if (s.matches("DATETIME\\((.*?)\\)"))
-            return formatDateTime(s, cal);
+            return new SimpleDateFormat(s.replaceAll("DATETIME\\((.*?)\\)", "$1"))
+                    .format(date);
 
         return get(s);
-    }
-
-    private String formatDateTime(String s, Calendar cal) {
-        DateFormat fmt = new SimpleDateFormat(s.replaceAll("DATETIME\\((.*?)\\)", "$1"));
-        return fmt.format(cal.getTime());
     }
 }
