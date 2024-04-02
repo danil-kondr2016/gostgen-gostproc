@@ -84,7 +84,7 @@ public class StarMathFixer {
 
     public static String fixCharacters(String formula) {
         StringBuilder f = new StringBuilder();
-        Pattern symbol = Pattern.compile("([\\u0370-\\u03FF]|[\\u2200-\\u22FF]|[\\uD800-\\uDBFF][\\uDC00-\\uDFFF])");
+        Pattern symbol = Pattern.compile("([\\u0370-\\u03FF]|[\\u2200-\\u22FF]|[\\x{1D400}-\\x{1D7FF}])");
         Matcher m = symbol.matcher(formula);
 
         while (m.find()) {
