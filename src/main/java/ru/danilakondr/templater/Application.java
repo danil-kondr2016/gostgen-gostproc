@@ -127,6 +127,7 @@ public class Application {
 			}
 		}
 		new MacroProcessor(xDoc, macros).process();
+		new ImageWidthFixer(xDoc).process();
 		new TableOfContentsInserter(xDoc).process();
 
 		this.success = true;
