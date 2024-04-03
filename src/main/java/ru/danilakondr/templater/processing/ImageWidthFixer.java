@@ -38,8 +38,16 @@ public class ImageWidthFixer extends Processor {
             if (actualSize.Width > 16500) {
                 long height = 16500L * actualSize.Height / actualSize.Width;
 
-                xObject.setPropertyValue("Width", 16500);
-                xObject.setPropertyValue("Height", Long.valueOf(height).intValue());
+                if (height <= 27700L) {
+                    xObject.setPropertyValue("Width", 16500);
+                    xObject.setPropertyValue("Height", Long.valueOf(height).intValue());
+                }
+                else {
+                    long width = 27700L * actualSize.Width / actualSize.Height;
+
+                    xObject.setPropertyValue("Width", Long.valueOf(width).intValue());
+                    xObject.setPropertyValue("Height", 27700);
+                }
             }
         }
     }
