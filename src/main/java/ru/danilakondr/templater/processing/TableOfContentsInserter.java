@@ -7,6 +7,7 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XSearchDescriptor;
 import com.sun.star.util.XSearchable;
+import com.sun.star.container.XIndexAccess;
 
 /**
  * Обработчик, вставляющий оглавление в документ на месте <code>%TOC%</code>.
@@ -42,14 +43,16 @@ public class TableOfContentsInserter extends Processor {
         xSD.setSearchString("^([ \\t]*)%TOC%$");
         xSD.setPropertyValue("SearchRegularExpression", true);
 
-        Object oResult = xS.findFirst(xSD);
-        if (oResult == null)
+        XIndexAccess xFound = xS.findAll(xSD);
+        if (!xFound.hasElements())
             return;
 
-        XTextRange xRange = UnoRuntime.queryInterface(XTextRange.class, oResult);
-        xCursor.gotoRange(xRange.getStart(), false);
-        xCursor.gotoRange(xRange.getEnd(), true);
-        putTableOfContents(xCursor);
+        for (int i = 0; i < xFound.getCount(); i++) {
+            XTextRange xRange = UnoRuntime.queryInterface(XTextRange.class, xFound.getByIndex(i));
+            xCursor.gotoRange(xRange.getStart(), false);
+            xCursor.gotoRange(xRange.getEnd(), true);
+            putTableOfContents(xCursor);
+        }
     }
 
     /**
