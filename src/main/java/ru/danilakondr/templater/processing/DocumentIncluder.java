@@ -11,6 +11,7 @@ import com.sun.star.util.XSearchDescriptor;
 import com.sun.star.util.XSearchable;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 
 /**
@@ -31,10 +32,12 @@ import java.util.regex.Pattern;
 public class DocumentIncluder extends Processor {
     private static final int INCLUDE_DEPTH_LIMIT = 16;
     private final String mainTextURL;
+    private final HashSet<String> notExisting;
 
     public DocumentIncluder(XTextDocument xDoc, String mainTextURL) {
         super(xDoc);
         this.mainTextURL = mainTextURL;
+        this.notExisting = new HashSet<>();
     }
 
     public void process() throws Exception {
@@ -46,7 +49,7 @@ public class DocumentIncluder extends Processor {
                 break;
         }
 
-        if (findAllIncludes().hasElements()) {
+        if (hasNotProcessedIncludes()) {
             throw new Exception("%INCLUDE% nested too deeply; maximal depth is " + INCLUDE_DEPTH_LIMIT);
         }
     }
@@ -63,6 +66,17 @@ public class DocumentIncluder extends Processor {
         xSD.setPropertyValue("SearchRegularExpression", true);
 
         return xS.findAll(xSD);
+    }
+
+    private boolean hasNotProcessedIncludes() throws Exception {
+        XIndexAccess xFound = findAllIncludes();
+        HashSet<String> macros = new HashSet<>();
+
+        for (int i = 0; i < xFound.getCount(); i++) {
+            macros.add(UnoRuntime.queryInterface(XTextRange.class, xFound.getByIndex(i)).getString());
+        }
+
+        return !macros.isEmpty() && macros.stream().noneMatch(notExisting::contains);
     }
 
     /**
@@ -124,9 +138,13 @@ public class DocumentIncluder extends Processor {
         Pattern macro = Pattern.compile("%INCLUDE\\((.*)\\)%");
         String include = macro.matcher(xRange.getString()).replaceAll("$1");
 
+        if (notExisting.contains(xRange.getString()))
+            return;
+
         File f = new File(include).getAbsoluteFile();
         if (!f.exists()) {
             System.err.printf("File %s not found. Skipping.\n", f);
+            notExisting.add(xRange.getString());
             return;
         }
 
