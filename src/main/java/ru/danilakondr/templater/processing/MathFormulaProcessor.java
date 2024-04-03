@@ -73,8 +73,6 @@ public class MathFormulaProcessor extends Processor {
                         .getExtendedControlOverEmbeddedObject();
                 formulas.put(aElName, xFormulaObject);
                 xExt.setUpdateMode(EmbedUpdateModes.ALWAYS_UPDATE);
-            } else {
-                System.out.println("This is not formula, skipping");
             }
         }
 

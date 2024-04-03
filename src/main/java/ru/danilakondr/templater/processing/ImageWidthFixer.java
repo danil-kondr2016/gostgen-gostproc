@@ -8,6 +8,8 @@ import com.sun.star.container.*;
 import com.sun.star.text.XTextGraphicObjectsSupplier;
 import com.sun.star.uno.UnoRuntime;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class ImageWidthFixer extends Processor {
     private final XNameAccess graphicObjects;
 
@@ -25,7 +27,9 @@ public class ImageWidthFixer extends Processor {
 
         String[] names = graphicObjects.getElementNames();
 
+        AtomicInteger i = new AtomicInteger(0);
         for (String objId : names) {
+            System.out.printf("Processing image object %d/%d...\n", i.incrementAndGet(), names.length);
             XPropertySet xObject = UnoRuntime
                     .queryInterface(XPropertySet.class, graphicObjects.getByName(objId));
 
