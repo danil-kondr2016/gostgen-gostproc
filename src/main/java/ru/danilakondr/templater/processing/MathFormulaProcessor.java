@@ -66,6 +66,8 @@ public class MathFormulaProcessor extends Processor {
                     oFormula
             );
 
+            xFormulaObject.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
+
             String guid = (String) xFormulaObject.getPropertyValue("CLSID");
             if (guid.equalsIgnoreCase(MATH_FORMULA_GUID)) {
                 XEmbeddedObject xExt = UnoRuntime
