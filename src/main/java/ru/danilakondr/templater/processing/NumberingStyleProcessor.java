@@ -12,6 +12,12 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Обрабатывает стили списков.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.2.7
+ */
 public class NumberingStyleProcessor extends Processor {
 
     public NumberingStyleProcessor(XTextDocument xDoc) {
@@ -53,7 +59,7 @@ public class NumberingStyleProcessor extends Processor {
             xParProp.setPropertyValue("NumberingRules", xRules);
         }
         // Значит, это не совсем абзац...
-        catch (UnknownPropertyException e) {}
+        catch (UnknownPropertyException ignored) {}
     }
 
     private void processRules(XIndexReplace xRules) throws Exception {

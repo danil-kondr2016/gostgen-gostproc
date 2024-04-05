@@ -14,6 +14,12 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Обрабатывает стили таблиц.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.2.8
+ */
 public class TableStyleProcessor extends Processor {
     public static final int TABLE_LINE_WIDTH = 17; // around 1/2 * (25.4/72) mm
     private final XNameAccess textTables;

@@ -8,8 +8,15 @@ import com.sun.star.container.*;
 import com.sun.star.text.XTextGraphicObjectsSupplier;
 import com.sun.star.uno.UnoRuntime;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Изменяет размер рисунков.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.2.6
+ */
 public class ImageWidthFixer extends Processor {
     private final XNameAccess graphicObjects;
 
