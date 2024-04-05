@@ -20,14 +20,14 @@ public class NumberingStyleProcessor extends Processor {
 
     @Override
     public void process() throws Exception {
-        System.out.println("Processing paragraphs...");
+        System.out.println("Processing numbering styles of paragraphs...");
         XEnumerationAccess xEnumAccess = UnoRuntime
                 .queryInterface(XEnumerationAccess.class, xDoc.getText());
         XEnumeration xEnum = xEnumAccess.createEnumeration();
 
         AtomicInteger i = new AtomicInteger(0);
         while (xEnum.hasMoreElements()) {
-            System.out.println("Processing paragraph #" + i.incrementAndGet() + "...");
+            System.out.println("Processing numbering style of paragraph #" + i.incrementAndGet() + "...");
             XTextContent xParagraph = UnoRuntime
                     .queryInterface(XTextContent.class, xEnum.nextElement());
 
