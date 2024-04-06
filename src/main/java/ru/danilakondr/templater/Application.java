@@ -125,7 +125,7 @@ public class Application {
 		MacroSubstitutor substitutor = new MacroSubstitutor(xDoc);
 		substitutor.substitute(new MainTextIncludeSubstitutor(), mainTextURL);
 		for (int i = 0; i < 16; i++)
-			substitutor.substitute(new IncludeSubstitutor(), null);
+			substitutor.substitute(new DocumentIncludeSubstitutor(), null);
 
 		DocumentObjectProcessor proc = new DocumentObjectProcessor(xDoc);
 		proc

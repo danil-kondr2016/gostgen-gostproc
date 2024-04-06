@@ -67,7 +67,6 @@ public class DocumentObjectProcessor {
         String[] elementNames = embeddedObjects.getElementNames();
         HashMap<String, Object> formulas = new HashMap<>();
 
-        AtomicInteger i = new AtomicInteger(0);
         for (String objId : elementNames) {
             Object oFormula = embeddedObjects.getByName(objId);
             XPropertySet xFormulaObject = UnoRuntime.queryInterface(

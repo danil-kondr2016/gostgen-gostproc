@@ -10,7 +10,7 @@ import com.sun.star.uno.UnoRuntime;
 import java.io.File;
 import java.util.regex.Pattern;
 
-public class IncludeSubstitutor implements MacroSubstitutor.Substitutor {
+public class DocumentIncludeSubstitutor implements MacroSubstitutor.Substitutor {
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
         Pattern macroPattern = Pattern.compile("%INCLUDE\\((.*)\\)%");
