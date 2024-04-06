@@ -1,9 +1,6 @@
 package ru.danilakondr.templater.processing;
 
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.table.BorderLine;
 import com.sun.star.table.TableBorder;
 import com.sun.star.text.XTextTable;

@@ -1,6 +1,5 @@
 package ru.danilakondr.templater.processing;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 public class ProgressInformer implements BiConsumer<Integer, Integer> {

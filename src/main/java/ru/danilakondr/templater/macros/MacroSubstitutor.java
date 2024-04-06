@@ -1,7 +1,6 @@
 package ru.danilakondr.templater.macros;
 
 import com.sun.star.container.XIndexAccess;
-import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
