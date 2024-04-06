@@ -78,7 +78,7 @@ public class Application {
 
 		if (app.help) {
 			System.out.println("Usage:");
-			System.out.print("postproc ");
+			System.out.print("templater ");
 			parser.printSingleLineUsage(System.out);
 			System.out.println();
 			System.out.println();
