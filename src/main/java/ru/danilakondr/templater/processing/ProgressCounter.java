@@ -2,7 +2,7 @@ package ru.danilakondr.templater.processing;
 
 import java.io.PrintStream;
 
-public class ProgressCounter implements Runnable {
+public class ProgressCounter {
     private int current, total;
     private boolean showProgress = true, showCurrent = true, showTotal = true;
     private String progressString;
@@ -71,8 +71,7 @@ public class ProgressCounter implements Runnable {
         this.current = 0;
     }
 
-    @Override
-    public void run() {
+    public void next() {
         synchronized (this) {
             if (this.total > 0 && this.current < this.total)
                 this.current++;

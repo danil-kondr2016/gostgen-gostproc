@@ -2,13 +2,14 @@ package ru.danilakondr.templater.processing;
 
 import com.sun.star.awt.Size;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import java.util.function.Consumer;
 
-public class ImageWidthFixConsumer implements Consumer<Object> {
+public class ImageWidthFixProcessor implements TextDocument.ObjectProcessor<Object> {
     @Override
-    public void accept(Object oImage) {
+    public void process(Object oImage, XTextDocument xDoc) {
         try {
             XPropertySet xImage = UnoRuntime
                     .queryInterface(XPropertySet.class, oImage);

@@ -2,13 +2,14 @@ package ru.danilakondr.templater.processing;
 
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.text.TextContentAnchorType;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import java.util.function.Consumer;
 
-public class MathFormulaFixConsumer implements Consumer<XPropertySet> {
+public class MathFormulaFixProcessor implements TextDocument.ObjectProcessor<XPropertySet> {
     @Override
-    public void accept(XPropertySet xFormulaObject) {
+    public void process(XPropertySet xFormulaObject, XTextDocument xDoc) {
         try {
             xFormulaObject.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
 

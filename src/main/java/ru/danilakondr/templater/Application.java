@@ -15,8 +15,6 @@ import java.lang.RuntimeException;
 import java.util.List;
 
 import com.sun.star.util.XCloseable;
-import org.apache.commons.text.StringSubstitutor;
-import org.apache.commons.text.lookup.StringLookup;
 import org.kohsuke.args4j.*;
 import ru.danilakondr.templater.macros.*;
 import ru.danilakondr.templater.processing.*;
@@ -141,11 +139,11 @@ public class Application {
 				.substitute(new StringMacroSubstitutor(), stringMacros)
 				.substitute(new TableOfContentsInserter(), null);
 
-		DocumentObjectProcessor proc = new DocumentObjectProcessor(xDoc);
+		TextDocument proc = new TextDocument(xDoc);
 		proc
-				.processFormulas(new MathFormulaFixConsumer(), new ProgressCounter("Processing formulas"))
-				.processParagraphs(new NumberingStyleConsumer(), new ProgressCounter("Processing numbering style of paragraphs"))
-				.processImages(new ImageWidthFixConsumer(), new ProgressCounter("Processing images"));
+				.processFormulas(new MathFormulaFixProcessor(), new ProgressCounter("Processing formulas"))
+				.processParagraphs(new NumberingStyleProcessor(), new ProgressCounter("Processing numbering style of paragraphs"))
+				.processImages(new ImageWidthFixProcessor(), new ProgressCounter("Processing images"));
 		ProgressCounter tablesCnt = new ProgressCounter("Processing tables");
 		List<XTextSection> tables = proc
 				.scanSections()
@@ -158,7 +156,7 @@ public class Application {
 				tablesCnt.setShowCurrent(false);
 				proc.processTablesInsideRange(
 						x.getAnchor(),
-						new TableStyleSetConsumer(),
+						new TableStyleSetter(),
 						tablesCnt
 				);
 			} catch (com.sun.star.uno.Exception e) {

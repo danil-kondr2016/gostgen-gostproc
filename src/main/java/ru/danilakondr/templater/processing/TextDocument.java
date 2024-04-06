@@ -14,19 +14,23 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class    DocumentObjectProcessor {
+public class TextDocument {
     private final XTextDocument xDoc;
     private static final String MATH_FORMULA_GUID = "078B7ABA-54FC-457F-8551-6147e776a997";
 
-    public DocumentObjectProcessor(XTextDocument xDoc) {
+    @FunctionalInterface
+    public interface ObjectProcessor<T> {
+        void process(T object, XTextDocument xDoc);
+    }
+
+    public TextDocument(XTextDocument xDoc) {
         this.xDoc = xDoc;
     }
 
-    public DocumentObjectProcessor processParagraphs(Consumer<XTextContent> proc, ProgressCounter progress) throws Exception {
+    public TextDocument processParagraphs(ObjectProcessor<XTextContent> proc, ProgressCounter progress) throws Exception {
         XEnumerationAccess xEnumAccess = UnoRuntime
                 .queryInterface(XEnumerationAccess.class, xDoc.getText());
         XEnumeration xEnum = xEnumAccess.createEnumeration();
@@ -36,14 +40,14 @@ public class    DocumentObjectProcessor {
             XTextContent xParagraph = UnoRuntime
                     .queryInterface(XTextContent.class, xEnum.nextElement());
 
-            progress.run();
-            proc.accept(xParagraph);
+            progress.next();
+            proc.process(xParagraph, xDoc);
         }
 
         return this;
     }
 
-    public DocumentObjectProcessor processImages(Consumer<Object> proc, ProgressCounter progress) throws Exception {
+    public TextDocument processImages(ObjectProcessor<Object> proc, ProgressCounter progress) throws Exception {
         XNameAccess graphicObjects = UnoRuntime
                 .queryInterface(XTextGraphicObjectsSupplier.class, xDoc)
                 .getGraphicObjects();
@@ -51,14 +55,14 @@ public class    DocumentObjectProcessor {
 
         progress.setTotal(names.length);
         for (String objId : names) {
-            progress.run();
-            proc.accept(graphicObjects.getByName(objId));
+            progress.next();
+            proc.process(graphicObjects.getByName(objId), xDoc);
         }
 
         return this;
     }
 
-    public DocumentObjectProcessor processFormulas(Consumer<XPropertySet> proc, ProgressCounter progress) throws Exception {
+    public TextDocument processFormulas(ObjectProcessor<XPropertySet> proc, ProgressCounter progress) throws Exception {
         XTextEmbeddedObjectsSupplier xEmbObj = UnoRuntime.queryInterface(
                 XTextEmbeddedObjectsSupplier.class,
                 this.xDoc
@@ -86,16 +90,16 @@ public class    DocumentObjectProcessor {
         }
 
         formulas.forEach((k, v) -> {
-            progress.run();
+            progress.next();
             XPropertySet xFormula = UnoRuntime
                     .queryInterface(XPropertySet.class, v);
-            proc.accept(xFormula);
+            proc.process(xFormula, xDoc);
         });
 
         return this;
     }
 
-    public DocumentObjectProcessor processTablesInsideRange(XTextRange range, Consumer<XTextTable> proc, ProgressCounter progress) throws Exception {
+    public TextDocument processTablesInsideRange(XTextRange range, ObjectProcessor<XTextTable> proc, ProgressCounter progress) throws Exception {
         XTextTablesSupplier xSup = UnoRuntime
                 .queryInterface(XTextTablesSupplier.class, xDoc);
         XNameAccess textTables = xSup.getTextTables();
@@ -118,14 +122,14 @@ public class    DocumentObjectProcessor {
 
         AtomicInteger i = new AtomicInteger(0);
         textTablesInRange.forEach((k, v) -> {
-            progress.run();
-            proc.accept(v);
+            progress.next();
+            proc.process(v, xDoc);
         });
 
         return this;
     }
 
-    public DocumentObjectProcessor updateAllIndexes() {
+    public TextDocument updateAllIndexes() {
         XDocumentIndexesSupplier xSup = UnoRuntime
                 .queryInterface(XDocumentIndexesSupplier.class, xDoc);
         XIndexAccess xIndexes = xSup.getDocumentIndexes();

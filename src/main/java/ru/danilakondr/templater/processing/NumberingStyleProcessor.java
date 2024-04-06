@@ -8,13 +8,14 @@ import com.sun.star.style.NumberingType;
 import com.sun.star.text.LabelFollow;
 import com.sun.star.text.PositionAndSpaceMode;
 import com.sun.star.text.XTextContent;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
 import java.util.function.Consumer;
 
-public class NumberingStyleConsumer implements Consumer<XTextContent> {
+public class NumberingStyleProcessor implements TextDocument.ObjectProcessor<XTextContent> {
     @Override
-    public void accept(XTextContent xParagraph) {
+    public void process(XTextContent xParagraph, XTextDocument xDoc) {
         XPropertySet xParProp = UnoRuntime
                 .queryInterface(XPropertySet.class, xParagraph);
 
