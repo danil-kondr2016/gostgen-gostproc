@@ -14,6 +14,7 @@ import java.lang.Exception;
 import java.lang.RuntimeException;
 import java.util.List;
 
+import com.sun.star.util.XCloseable;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookup;
 import org.kohsuke.args4j.*;
@@ -120,12 +121,24 @@ public class Application {
 			throw new FileNotFoundException(mainTextPath);
 		}
 
+		if (macroFile != null) {
+			if (new File(macroFile).exists()) {
+				stringMacros.loadFromFile(macroFile);
+			}
+			else {
+				System.err.printf("File %s not found, skipping\n", macroFile);
+			}
+		}
+
 		this.loadTemplate();
 
 		MacroSubstitutor substitutor = new MacroSubstitutor(xDoc);
 		substitutor.substitute(new MainTextIncludeSubstitutor(), mainTextURL);
 		for (int i = 0; i < 16; i++)
 			substitutor.substitute(new DocumentIncludeSubstitutor(), null);
+		substitutor
+				.substitute(new StringMacroSubstitutor(), new StringSubstitutor((StringLookup) stringMacros))
+				.substitute(new TableOfContentsInserter(), null);
 
 		DocumentObjectProcessor proc = new DocumentObjectProcessor(xDoc);
 		proc
@@ -149,19 +162,6 @@ public class Application {
 				throw new RuntimeException(e);
 			}
 		});
-
-		if (macroFile != null) {
-			if (new File(macroFile).exists()) {
-				stringMacros.loadFromFile(macroFile);
-			}
-			else {
-				System.err.printf("File %s not found, skipping\n", macroFile);
-			}
-		}
-
-		substitutor
-				.substitute(new StringMacroSubstitutor(), new StringSubstitutor((StringLookup) stringMacros))
-				.substitute(new TableOfContentsInserter(), null);
 
 		proc.updateAllIndexes();
 
@@ -222,8 +222,6 @@ public class Application {
 
 	/**
 	 * Завершает приложение.
-	 *
-	 * FIXME: приложение закрывается вместе со всем Либреофисом.
 	 */
 	public void terminate() {
 		if (this.success) {
@@ -234,6 +232,18 @@ public class Application {
 			}
 		}
 
-		xDesktop.terminate();
+		try {
+			XCloseable xCloseable = UnoRuntime
+					.queryInterface(XCloseable.class, xDoc);
+			xCloseable.close(true);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		finally {
+			System.out.println("Terminated");
+		}
+
+		//xDesktop.terminate();
 	}
 }
