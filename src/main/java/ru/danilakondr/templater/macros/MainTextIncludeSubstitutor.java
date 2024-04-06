@@ -12,12 +12,6 @@ import java.util.regex.Pattern;
 public class MainTextIncludeSubstitutor implements MacroSubstitutor.Substitutor {
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
-        Pattern macroPattern = Pattern.compile("%MAIN_TEXT%");
-        String macro = xRange.getString();
-
-        if (!macroPattern.matcher(macro).matches())
-            return;
-
         String include = (String)parameter;
         try {
             System.out.printf("Including %s\n", include);
@@ -31,5 +25,10 @@ public class MainTextIncludeSubstitutor implements MacroSubstitutor.Substitutor 
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean test(XTextRange xRange) {
+        return xRange.getString().compareTo("%MAIN_TEXT%") == 0;
     }
 }

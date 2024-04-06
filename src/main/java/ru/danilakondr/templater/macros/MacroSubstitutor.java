@@ -16,7 +16,11 @@ public class MacroSubstitutor {
 
     @FunctionalInterface
     public interface Substitutor {
-        public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter);
+        void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter);
+
+        default boolean test(XTextRange xRange) {
+            return xRange.getString().matches("%(.*?)%");
+        }
     }
 
     public MacroSubstitutor substitute(Substitutor proc, Object parameter) throws Exception {
@@ -30,7 +34,9 @@ public class MacroSubstitutor {
         for (int i = 0; i < xAllFound.getCount(); i++) {
             Object oFound = xAllFound.getByIndex(i);
             XTextRange xFound = UnoRuntime.queryInterface(XTextRange.class, oFound);
-            proc.substitute(xDoc, xFound, parameter);
+            if (proc.test(xFound)) {
+                proc.substitute(xDoc, xFound, parameter);
+            }
         }
 
         return this;

@@ -8,23 +8,18 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.regex.Pattern;
 
 public class DocumentIncludeSubstitutor implements MacroSubstitutor.Substitutor {
+    private final Pattern macroPattern = Pattern.compile("%INCLUDE\\((.*)\\)%");
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
-        Pattern macroPattern = Pattern.compile("%INCLUDE\\((.*)\\)%");
-        String macro = xRange.getString();
-
-        if (!macroPattern.matcher(macro).matches())
-            return;
-
         String include = macroPattern.matcher(xRange.getString()).replaceAll("$1");
 
         File f = new File(include).getAbsoluteFile();
         if (!f.exists()) {
-            System.err.printf("File %s not found. Skipping.\n", f);
-            return;
+            throw new RuntimeException(new FileNotFoundException(f.getAbsolutePath()));
         }
 
         String url = f.toURI().toString();
@@ -40,5 +35,10 @@ public class DocumentIncludeSubstitutor implements MacroSubstitutor.Substitutor 
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean test(XTextRange xRange) {
+        return macroPattern.matcher(xRange.getString()).matches();
     }
 }

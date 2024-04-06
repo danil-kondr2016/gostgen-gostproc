@@ -50,12 +50,6 @@ public class TableOfContentsInserter implements MacroSubstitutor.Substitutor {
 
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
-        Pattern macroPattern = Pattern.compile("%TOC%");
-        String macro = xRange.getString();
-
-        if (!macroPattern.matcher(macro).matches())
-            return;
-
         System.out.println("Inserting Table of Contents...");
 
         XText xText = xDoc.getText();
@@ -68,5 +62,10 @@ public class TableOfContentsInserter implements MacroSubstitutor.Substitutor {
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean test(XTextRange xRange) {
+        return xRange.getString().contains("%TOC%");
     }
 }
