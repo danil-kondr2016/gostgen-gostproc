@@ -73,10 +73,10 @@ public class ProgressCounter {
 
     public void next() {
         synchronized (this) {
-            if (this.total > 0 && this.current < this.total)
+            if (this.total > 0 && this.current < this.total || this.total == 0)
                 this.current++;
 
-            if (true)
+            if (!showProgress)
                 return;
 
             if (showCurrent && showTotal)
