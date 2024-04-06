@@ -14,12 +14,16 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class TextDocument {
     private final XTextDocument xDoc;
+    private final XTextRangeCompare xCmp;
     private static final String MATH_FORMULA_GUID = "078B7ABA-54FC-457F-8551-6147e776a997";
+
+    private final HashMap<String, Object> formulas;
+
+    private final HashMap<String, XTextSection> sections;
 
     @FunctionalInterface
     public interface ObjectProcessor<T> {
@@ -28,6 +32,57 @@ public class TextDocument {
 
     public TextDocument(XTextDocument xDoc) {
         this.xDoc = xDoc;
+        this.xCmp = UnoRuntime
+                .queryInterface(XTextRangeCompare.class, xDoc.getText());
+        this.formulas = new HashMap<>();
+        this.sections = new HashMap<>();
+    }
+
+    private boolean isRangeInside(XTextRange b, XTextRange a)
+    {
+        return xCmp.compareRegionStarts(a, b) >= 0 && xCmp.compareRegionEnds(a, b) <= 0;
+    }
+
+    private void scanAllFormulas() throws Exception
+    {
+        if (!formulas.isEmpty())
+            return;
+
+        XTextEmbeddedObjectsSupplier xEmbObj = UnoRuntime.queryInterface(
+                XTextEmbeddedObjectsSupplier.class,
+                this.xDoc
+        );
+        XNameAccess embeddedObjects = xEmbObj.getEmbeddedObjects();
+        String[] elementNames = embeddedObjects.getElementNames();
+
+        for (String objId : elementNames) {
+            Object oFormula = embeddedObjects.getByName(objId);
+            XPropertySet xFormulaObject = UnoRuntime.queryInterface(
+                    XPropertySet.class,
+                    oFormula
+            );
+
+            String guid = (String) xFormulaObject.getPropertyValue("CLSID");
+            if (guid.equalsIgnoreCase(MATH_FORMULA_GUID)) {
+                XEmbeddedObject xExt = UnoRuntime
+                        .queryInterface(XEmbeddedObjectSupplier2.class, xFormulaObject)
+                        .getExtendedControlOverEmbeddedObject();
+                formulas.put(objId, oFormula);
+                xExt.setUpdateMode(EmbedUpdateModes.ALWAYS_UPDATE);
+            }
+        }
+    }
+
+    private void scanAllSections() throws Exception {
+        XTextSectionsSupplier xSup = UnoRuntime
+                .queryInterface(XTextSectionsSupplier.class, xDoc);
+        XNameAccess xSections = xSup.getTextSections();
+
+        for (String objId : xSections.getElementNames()) {
+            XTextSection xTextSection = UnoRuntime
+                    .queryInterface(XTextSection.class, xSections.getByName(objId));
+            this.sections.put(objId, xTextSection);
+        }
     }
 
     public TextDocument processParagraphs(ObjectProcessor<XTextContent> proc, ProgressCounter progress) throws Exception {
@@ -62,38 +117,14 @@ public class TextDocument {
         return this;
     }
 
-    public TextDocument processFormulas(ObjectProcessor<XPropertySet> proc, ProgressCounter progress) throws Exception {
-        XTextEmbeddedObjectsSupplier xEmbObj = UnoRuntime.queryInterface(
-                XTextEmbeddedObjectsSupplier.class,
-                this.xDoc
-        );
-        XNameAccess embeddedObjects = xEmbObj.getEmbeddedObjects();
-        String[] elementNames = embeddedObjects.getElementNames();
-        HashMap<String, Object> formulas = new HashMap<>();
+    public TextDocument processFormulas(ObjectProcessor<Object> proc, ProgressCounter progress) throws Exception {
+        if (formulas.isEmpty())
+            scanAllFormulas();
 
-        for (String objId : elementNames) {
-            Object oFormula = embeddedObjects.getByName(objId);
-            XPropertySet xFormulaObject = UnoRuntime.queryInterface(
-                    XPropertySet.class,
-                    oFormula
-            );
-
-            String guid = (String) xFormulaObject.getPropertyValue("CLSID");
-            if (guid.equalsIgnoreCase(MATH_FORMULA_GUID)) {
-                XEmbeddedObject xExt = UnoRuntime
-                        .queryInterface(XEmbeddedObjectSupplier2.class, xFormulaObject)
-                        .getExtendedControlOverEmbeddedObject();
-                formulas.put(objId, oFormula);
-                xExt.setUpdateMode(EmbedUpdateModes.ALWAYS_UPDATE);
-                progress.incrementTotal();
-            }
-        }
-
+        progress.setTotal(formulas.size());
         formulas.forEach((k, v) -> {
             progress.next();
-            XPropertySet xFormula = UnoRuntime
-                    .queryInterface(XPropertySet.class, v);
-            proc.process(xFormula, xDoc);
+            proc.process(v, xDoc);
         });
 
         return this;
@@ -106,15 +137,12 @@ public class TextDocument {
         String[] textTablesNames = textTables.getElementNames();
         HashMap<String, XTextTable> textTablesInRange = new HashMap<>();
 
-        XTextRangeCompare xCmp = UnoRuntime
-                .queryInterface(XTextRangeCompare.class, xDoc.getText());
-
         for (String objId : textTablesNames) {
             XTextTable xTable = UnoRuntime
                     .queryInterface(XTextTable.class, textTables.getByName(objId));
             XTextRange xTableRange = xTable.getAnchor();
 
-            if (xCmp.compareRegionStarts(range, xTableRange) >= 0 && xCmp.compareRegionEnds(range, xTableRange) <= 0) {
+            if (isRangeInside(xTableRange, range)) {
                 textTablesInRange.put(objId, xTable);
                 progress.incrementTotal();
             }
@@ -148,18 +176,10 @@ public class TextDocument {
         return this;
     }
 
-    public Stream<XTextSection> scanSections() throws Exception {
-        XTextSectionsSupplier xSup = UnoRuntime
-                .queryInterface(XTextSectionsSupplier.class, xDoc);
-        XNameAccess xSections = xSup.getTextSections();
-        Stream.Builder<XTextSection> builder = Stream.builder();
+    public Stream<XTextSection> streamSections() throws Exception {
+        if (sections.isEmpty())
+            scanAllSections();
 
-        for (String objId : xSections.getElementNames()) {
-            XTextSection xTextSection = UnoRuntime
-                    .queryInterface(XTextSection.class, xSections.getByName(objId));
-            builder.accept(xTextSection);
-        }
-
-        return builder.build();
+        return sections.values().stream();
     }
 }

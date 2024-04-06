@@ -7,12 +7,12 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.function.Consumer;
 
-public class MathFormulaFixProcessor implements TextDocument.ObjectProcessor<XPropertySet> {
+public class MathFormulaFixProcessor implements TextDocument.ObjectProcessor<Object> {
     @Override
-    public void process(XPropertySet xFormulaObject, XTextDocument xDoc) {
+    public void process(Object object, XTextDocument xDoc) {
         try {
-            xFormulaObject.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
-
+            XPropertySet xFormulaObject = UnoRuntime
+                    .queryInterface(XPropertySet.class, object);
             Object oFormula = xFormulaObject.getPropertyValue("Model");
 
             XPropertySet xPropertySet = UnoRuntime

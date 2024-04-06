@@ -129,6 +129,8 @@ public class Application {
 			}
 		}
 
+		processMainDoc(mainTextURL);
+
 		this.loadTemplate();
 
 		MacroSubstitutor substitutor = new MacroSubstitutor(xDoc);
@@ -141,12 +143,14 @@ public class Application {
 
 		TextDocument proc = new TextDocument(xDoc);
 		proc
-				.processFormulas(new MathFormulaFixProcessor(), new ProgressCounter("Processing formulas"))
+				.processFormulas(new MathFormulaFixProcessor(), new ProgressCounter("Fixing formulas"))
+				.processFormulas(new ObjectAligner(), new ProgressCounter("Aligning formulas properly"))
 				.processParagraphs(new NumberingStyleProcessor(), new ProgressCounter("Processing numbering style of paragraphs"))
-				.processImages(new ImageWidthFixProcessor(), new ProgressCounter("Processing images"));
+				.processImages(new ImageWidthFixProcessor(), new ProgressCounter("Fixing image widths"))
+				.processImages(new ObjectAligner(), new ProgressCounter("Fixing image alignments"));
 		ProgressCounter tablesCnt = new ProgressCounter("Processing tables");
 		List<XTextSection> tables = proc
-				.scanSections()
+				.streamSections()
 				.filter(s -> UnoRuntime.queryInterface(XNamed.class, s).getName().startsWith("tbl:"))
 				.toList();
 		tables.forEach(x -> {
@@ -169,6 +173,30 @@ public class Application {
 		this.success = true;
 	}
 
+	private void processMainDoc(String mainTextURL) throws Exception {
+		XTextDocument xMainDoc = this.loadFile(mainTextURL);
+		XCloseable xMainDocCloseable = UnoRuntime.queryInterface(XCloseable.class, xMainDoc);
+		XStorable xMainDocStorable = UnoRuntime.queryInterface(XStorable.class, xMainDoc);
+
+		TextDocument mainDoc = new TextDocument(xMainDoc);
+		mainDoc.processFormulas((o, d) -> {
+			XTextContent xContent = UnoRuntime.queryInterface(XTextContent.class, o);
+			XPropertySet xContentProps = UnoRuntime.queryInterface(XPropertySet.class, o);
+			try {
+				XTextRange range = xContent.getAnchor();
+				XText text = xContent.getAnchor().getText();
+				text.insertTextContent(range.getEnd(), xContent, false);
+				text.insertTextContent(range.getEnd(), xContent, false);
+				text.insertTextContent(range.getEnd(), xContent, false);
+				xContentProps.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
+			}
+			catch (Exception ignored) {}
+		}, new ProgressCounter("Processing formula in main file"));
+
+		xMainDocStorable.store();
+		xMainDocCloseable.close(true);
+	}
+
 	/**
 	 * Создаёт &laquo;рабочий стол&raquo; LibreOffice.
 	 */
@@ -185,6 +213,21 @@ public class Application {
 			return null;
 
 		return f.toPath().toUri().toString();
+	}
+
+	private XTextDocument loadFile(String url) throws Exception {
+		XComponentLoader xCompLoader = UnoRuntime
+				.queryInterface(XComponentLoader.class, xDesktop);
+
+		PropertyValue[] props = new PropertyValue[1];
+		props[0] = new PropertyValue();
+		props[0].Name = "Hidden";
+		props[0].Value = Boolean.TRUE;
+
+		XComponent xComp = xCompLoader.loadComponentFromURL(url, "_blank", 0, props);
+		XTextDocument doc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
+
+		return doc;
 	}
 
 	private void loadTemplate() throws Exception {
