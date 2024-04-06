@@ -18,7 +18,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class DocumentObjectProcessor {
+public class    DocumentObjectProcessor {
     private final XTextDocument xDoc;
     private static final String MATH_FORMULA_GUID = "078B7ABA-54FC-457F-8551-6147e776a997";
 
@@ -26,39 +26,39 @@ public class DocumentObjectProcessor {
         this.xDoc = xDoc;
     }
 
-    public DocumentObjectProcessor processParagraphs(Consumer<XTextContent> proc, BiConsumer<Integer, Integer> progress) throws Exception {
+    public DocumentObjectProcessor processParagraphs(Consumer<XTextContent> proc, ProgressCounter progress) throws Exception {
         XEnumerationAccess xEnumAccess = UnoRuntime
                 .queryInterface(XEnumerationAccess.class, xDoc.getText());
         XEnumeration xEnum = xEnumAccess.createEnumeration();
 
-        AtomicInteger i = new AtomicInteger(0);
+        progress.setShowTotal(false);
         while (xEnum.hasMoreElements()) {
             XTextContent xParagraph = UnoRuntime
                     .queryInterface(XTextContent.class, xEnum.nextElement());
 
-            progress.accept(i.incrementAndGet(), -1);
+            progress.run();
             proc.accept(xParagraph);
         }
 
         return this;
     }
 
-    public DocumentObjectProcessor processImages(Consumer<Object> proc, BiConsumer<Integer, Integer> progress) throws Exception {
+    public DocumentObjectProcessor processImages(Consumer<Object> proc, ProgressCounter progress) throws Exception {
         XNameAccess graphicObjects = UnoRuntime
                 .queryInterface(XTextGraphicObjectsSupplier.class, xDoc)
                 .getGraphicObjects();
         String[] names = graphicObjects.getElementNames();
 
-        AtomicInteger i = new AtomicInteger(0);
+        progress.setTotal(names.length);
         for (String objId : names) {
-            progress.accept(i.incrementAndGet(), objId.length());
+            progress.run();
             proc.accept(graphicObjects.getByName(objId));
         }
 
         return this;
     }
 
-    public DocumentObjectProcessor processFormulas(Consumer<XPropertySet> proc, BiConsumer<Integer, Integer> progress) throws Exception {
+    public DocumentObjectProcessor processFormulas(Consumer<XPropertySet> proc, ProgressCounter progress) throws Exception {
         XTextEmbeddedObjectsSupplier xEmbObj = UnoRuntime.queryInterface(
                 XTextEmbeddedObjectsSupplier.class,
                 this.xDoc
@@ -81,12 +81,12 @@ public class DocumentObjectProcessor {
                         .getExtendedControlOverEmbeddedObject();
                 formulas.put(objId, oFormula);
                 xExt.setUpdateMode(EmbedUpdateModes.ALWAYS_UPDATE);
+                progress.incrementTotal();
             }
         }
 
-        AtomicInteger count = new AtomicInteger(0);
         formulas.forEach((k, v) -> {
-            progress.accept(count.incrementAndGet(), formulas.size());
+            progress.run();
             XPropertySet xFormula = UnoRuntime
                     .queryInterface(XPropertySet.class, v);
             proc.accept(xFormula);
@@ -95,7 +95,7 @@ public class DocumentObjectProcessor {
         return this;
     }
 
-    public DocumentObjectProcessor processTablesInsideRange(XTextRange range, Consumer<XTextTable> proc, BiConsumer<Integer, Integer> progress) throws Exception {
+    public DocumentObjectProcessor processTablesInsideRange(XTextRange range, Consumer<XTextTable> proc, ProgressCounter progress) throws Exception {
         XTextTablesSupplier xSup = UnoRuntime
                 .queryInterface(XTextTablesSupplier.class, xDoc);
         XNameAccess textTables = xSup.getTextTables();
@@ -110,13 +110,15 @@ public class DocumentObjectProcessor {
                     .queryInterface(XTextTable.class, textTables.getByName(objId));
             XTextRange xTableRange = xTable.getAnchor();
 
-            if (xCmp.compareRegionStarts(range, xTableRange) >= 0 && xCmp.compareRegionEnds(range, xTableRange) <= 0)
+            if (xCmp.compareRegionStarts(range, xTableRange) >= 0 && xCmp.compareRegionEnds(range, xTableRange) <= 0) {
                 textTablesInRange.put(objId, xTable);
+                progress.incrementTotal();
+            }
         }
 
         AtomicInteger i = new AtomicInteger(0);
         textTablesInRange.forEach((k, v) -> {
-            progress.accept(i.incrementAndGet(), textTablesInRange.size());
+            progress.run();
             proc.accept(v);
         });
 

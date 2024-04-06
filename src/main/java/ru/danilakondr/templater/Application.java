@@ -123,6 +123,7 @@ public class Application {
 
 		if (macroFile != null) {
 			if (new File(macroFile).exists()) {
+				System.err.println("Loading macros from file...");
 				stringMacros.loadFromFile(macroFile);
 			}
 			else {
@@ -137,14 +138,15 @@ public class Application {
 		for (int i = 0; i < 16; i++)
 			substitutor.substitute(new DocumentIncludeSubstitutor(), null);
 		substitutor
-				.substitute(new StringMacroSubstitutor(), new StringSubstitutor((StringLookup) stringMacros))
+				.substitute(new StringMacroSubstitutor(), stringMacros)
 				.substitute(new TableOfContentsInserter(), null);
 
 		DocumentObjectProcessor proc = new DocumentObjectProcessor(xDoc);
 		proc
-				.processFormulas(new MathFormulaFixConsumer(), new ProgressInformer("Processing formulas"))
-				.processParagraphs(new NumberingStyleConsumer(), new ProgressInformer("Processing numbering style of paragraphs"))
-				.processImages(new ImageWidthFixConsumer(), new ProgressInformer("Processing images"));
+				.processFormulas(new MathFormulaFixConsumer(), new ProgressCounter("Processing formulas"))
+				.processParagraphs(new NumberingStyleConsumer(), new ProgressCounter("Processing numbering style of paragraphs"))
+				.processImages(new ImageWidthFixConsumer(), new ProgressCounter("Processing images"));
+		ProgressCounter tablesCnt = new ProgressCounter("Processing tables");
 		List<XTextSection> tables = proc
 				.scanSections()
 				.filter(s -> UnoRuntime.queryInterface(XNamed.class, s).getName().startsWith("tbl:"))
@@ -152,11 +154,12 @@ public class Application {
 		tables.forEach(x -> {
 			try {
 				String name  = UnoRuntime.queryInterface(XNamed.class, x).getName();
-				System.out.printf("Processing tables inside section %s\n", name);
+				tablesCnt.setString(String.format("Processing tables inside section %s", name));
+				tablesCnt.setShowCurrent(false);
 				proc.processTablesInsideRange(
 						x.getAnchor(),
 						new TableStyleSetConsumer(),
-						(a, b) -> {}
+						tablesCnt
 				);
 			} catch (com.sun.star.uno.Exception e) {
 				throw new RuntimeException(e);
