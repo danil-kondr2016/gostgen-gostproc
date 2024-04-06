@@ -3,46 +3,18 @@ package ru.danilakondr.templater.processing;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XIndexReplace;
 import com.sun.star.style.NumberingType;
-import com.sun.star.text.*;
+import com.sun.star.text.LabelFollow;
+import com.sun.star.text.PositionAndSpaceMode;
+import com.sun.star.text.XTextContent;
 import com.sun.star.uno.UnoRuntime;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
-/**
- * Обрабатывает стили списков.
- *
- * @author Данила А. Кондратенко
- * @since 0.2.7
- */
-public class NumberingStyleProcessor extends Processor {
-
-    public NumberingStyleProcessor(XTextDocument xDoc) {
-        super(xDoc);
-    }
-
+public class NumberingStyleConsumer implements Consumer<XTextContent> {
     @Override
-    public void process() throws Exception {
-        System.out.println("Processing numbering styles of paragraphs...");
-        XEnumerationAccess xEnumAccess = UnoRuntime
-                .queryInterface(XEnumerationAccess.class, xDoc.getText());
-        XEnumeration xEnum = xEnumAccess.createEnumeration();
-
-        AtomicInteger i = new AtomicInteger(0);
-        while (xEnum.hasMoreElements()) {
-            System.out.println("Processing numbering style of paragraph #" + i.incrementAndGet() + "...");
-            XTextContent xParagraph = UnoRuntime
-                    .queryInterface(XTextContent.class, xEnum.nextElement());
-
-            processSingleParagraph(xParagraph);
-        }
-
-    }
-
-    private void processSingleParagraph(XTextContent xParagraph) throws  Exception {
+    public void accept(XTextContent xParagraph) {
         XPropertySet xParProp = UnoRuntime
                 .queryInterface(XPropertySet.class, xParagraph);
 
@@ -55,18 +27,17 @@ public class NumberingStyleProcessor extends Processor {
                     .queryInterface(XIndexReplace.class,
                             xParProp.getPropertyValue("NumberingRules"));
 
-            processRules(xRules);
+            for (int i = 0; i < 4; i++) {
+                PropertyValue[] levelProps = (PropertyValue[])xRules.getByIndex(i);
+                processSingleLevel(i, levelProps);
+                xRules.replaceByIndex(i, levelProps);
+            }
             xParProp.setPropertyValue("NumberingRules", xRules);
         }
         // Значит, это не совсем абзац...
         catch (UnknownPropertyException ignored) {}
-    }
-
-    private void processRules(XIndexReplace xRules) throws Exception {
-        for (int i = 0; i < 4; i++) {
-            PropertyValue[] levelProps = (PropertyValue[])xRules.getByIndex(i);
-            processSingleLevel(i, levelProps);
-            xRules.replaceByIndex(i, levelProps);
+        catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -1,4 +1,4 @@
-package ru.danilakondr.templater.processing;
+package ru.danilakondr.templater.macros;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Objects;
 
 import org.apache.commons.text.lookup.StringLookup;
 
@@ -16,8 +15,8 @@ import org.apache.commons.text.lookup.StringLookup;
  * @author Данила А. Кондратенко
  * @since 0.2.1
  */
-public class Macros extends HashMap<String, String> implements StringLookup {
-    public Macros() {
+public class StringMacros extends HashMap<String, String> implements StringLookup {
+    public StringMacros() {
         super();
     }
 

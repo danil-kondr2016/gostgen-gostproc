@@ -2,6 +2,7 @@ package ru.danilakondr.templater;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.container.XNamed;
 import com.sun.star.text.*;
 import com.sun.star.frame.*;
 import com.sun.star.uno.*;
@@ -10,8 +11,13 @@ import com.sun.star.lang.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.Exception;
+import java.lang.RuntimeException;
+import java.util.List;
 
+import org.apache.commons.text.StringSubstitutor;
+import org.apache.commons.text.lookup.StringLookup;
 import org.kohsuke.args4j.*;
+import ru.danilakondr.templater.macros.*;
 import ru.danilakondr.templater.processing.*;
 
 /**
@@ -39,7 +45,7 @@ public class Application {
 	@Option(name="-h", aliases=	{"--help", "-?"})
 	private boolean help;
 
-	private final Macros macros;
+	private final StringMacros stringMacros;
     private XDesktop xDesktop;
 	private XTextDocument xDoc;
 	private XComponentContext xContext;
@@ -50,7 +56,7 @@ public class Application {
 		this.xContext = null;
 		this.xMCF = null;
 		this.macroFile = null;
-		this.macros = new Macros();
+		this.stringMacros = new StringMacros();
 	}
 
 	public void setContext(XComponentContext xContext) {
@@ -116,21 +122,48 @@ public class Application {
 
 		this.loadTemplate();
 
-		new DocumentIncluder(xDoc, mainTextURL).process();
-		new MathFormulaProcessor(xDoc).process();
+		MacroSubstitutor substitutor = new MacroSubstitutor(xDoc);
+		substitutor.substitute(new MainTextIncludeSubstitutor(), mainTextURL);
+		for (int i = 0; i < 16; i++)
+			substitutor.substitute(new IncludeSubstitutor(), null);
+
+		DocumentObjectProcessor proc = new DocumentObjectProcessor(xDoc);
+		proc
+				.processFormulas(new MathFormulaFixConsumer(), new ProgressInformer("Processing formulas"))
+				.processParagraphs(new NumberingStyleConsumer(), new ProgressInformer("Processing numbering style of paragraphs"))
+				.processImages(new ImageWidthFixConsumer(), new ProgressInformer("Processing images"));
+		List<XTextSection> tables = proc
+				.scanSections()
+				.filter(s -> UnoRuntime.queryInterface(XNamed.class, s).getName().startsWith("tbl:"))
+				.toList();
+		tables.forEach(x -> {
+			try {
+				String name  = UnoRuntime.queryInterface(XNamed.class, x).getName();
+				System.out.printf("Processing tables inside section %s\n", name);
+				proc.processTablesInsideRange(
+						x.getAnchor(),
+						new TableStyleSetConsumer(),
+						(a, b) -> {}
+				);
+			} catch (com.sun.star.uno.Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+
 		if (macroFile != null) {
 			if (new File(macroFile).exists()) {
-				macros.loadFromFile(macroFile);
+				stringMacros.loadFromFile(macroFile);
 			}
 			else {
 				System.err.printf("File %s not found, skipping\n", macroFile);
 			}
 		}
-		new MacroProcessor(xDoc, macros).process();
-		new ImageWidthFixer(xDoc).process();
-		new NumberingStyleProcessor(xDoc).process();
-		new TableStyleProcessor(xDoc).process();
-		new TableOfContentsInserter(xDoc).process();
+
+		substitutor
+				.substitute(new StringMacroSubstitutor(), new StringSubstitutor((StringLookup) stringMacros))
+				.substitute(new TableOfContentsInserter(), null);
+
+		proc.updateAllIndexes();
 
 		this.success = true;
 	}
