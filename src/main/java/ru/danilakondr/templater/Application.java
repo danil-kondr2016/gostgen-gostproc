@@ -36,13 +36,13 @@ import javax.swing.*;
  * @since 0.1.0
  */
 public class Application {
-	@Option(name="-t", aliases={"--template"}, usage="Template file", required = true)
+	@Option(name="-t", aliases={"--template"}, usage="Template file")
 	private String templatePath;
 
-	@Option(name="-m", aliases={"--main-text"}, usage="Main text file", required = true)
+	@Option(name="-m", aliases={"--main-text"}, usage="Main text file")
 	private String mainTextPath;
 
-	@Option(name="-o", aliases={"--output"}, usage="Output file", required = true)
+	@Option(name="-o", aliases={"--output"}, usage="Output file")
 	private String outputPath;
 
 	@Option(name="-M", aliases={"--macros"}, usage="Macros file")
@@ -216,6 +216,13 @@ public class Application {
 	}
 
 	private void checkPaths() throws Exception {
+		if (templatePath == null)
+			throw new IllegalArgumentException("Template file has not been specified");
+		if (mainTextPath == null)
+			throw new IllegalArgumentException("Main text file has not been specified");
+		if (outputPath == null)
+			throw new IllegalArgumentException("Output file has not been specified");
+
 		String mainTextURL = getURI(mainTextPath, true);
 		String templateURL = getURI(templatePath, true);
 
@@ -223,8 +230,6 @@ public class Application {
 			throw new FileNotFoundException(templatePath);
 		if (mainTextURL == null)
 			throw new FileNotFoundException(mainTextPath);
-		if (outputPath == null)
-			throw new IllegalArgumentException("Output file has not been specified");
 
 		String outputURL = getURI(outputPath, false);
 		assert outputURL != null;
