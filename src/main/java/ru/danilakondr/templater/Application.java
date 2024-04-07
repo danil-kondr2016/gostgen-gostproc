@@ -293,6 +293,17 @@ public class Application {
 	}
 
 	/**
+	 * Закрывает документ.
+	 *
+	 * @since 0.3.3
+	 */
+	private void closeDocument() throws Exception {
+		XCloseable xCloseable = UnoRuntime
+				.queryInterface(XCloseable.class, xDoc);
+		xCloseable.close(true);
+	}
+
+	/**
 	 * Завершает приложение.
 	 *
 	 * @since 0.1.0
@@ -307,9 +318,7 @@ public class Application {
 		}
 
 		try {
-			XCloseable xCloseable = UnoRuntime
-					.queryInterface(XCloseable.class, xDoc);
-			xCloseable.close(true);
+			this.closeDocument();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
