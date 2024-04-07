@@ -129,7 +129,7 @@ public class Application {
 			}
 		}
 
-		processMainDoc(mainTextURL);
+		fixFormulasAlignmentInMainFile(mainTextURL);
 
 		this.loadTemplate();
 
@@ -173,21 +173,21 @@ public class Application {
 		this.success = true;
 	}
 
-	private void processMainDoc(String mainTextURL) throws Exception {
+	/**
+	 * Исправляет выравнивание формул в главном файле.
+	 *
+	 * @param mainTextURL URL-адрес файла
+	 * @since 0.3.2
+	 */
+	private void fixFormulasAlignmentInMainFile(String mainTextURL) throws Exception {
 		XTextDocument xMainDoc = this.loadFile(mainTextURL);
 		XCloseable xMainDocCloseable = UnoRuntime.queryInterface(XCloseable.class, xMainDoc);
 		XStorable xMainDocStorable = UnoRuntime.queryInterface(XStorable.class, xMainDoc);
 
 		TextDocument mainDoc = new TextDocument(xMainDoc);
 		mainDoc.processFormulas((o, d) -> {
-			XTextContent xContent = UnoRuntime.queryInterface(XTextContent.class, o);
 			XPropertySet xContentProps = UnoRuntime.queryInterface(XPropertySet.class, o);
 			try {
-				XTextRange range = xContent.getAnchor();
-				XText text = xContent.getAnchor().getText();
-				text.insertTextContent(range.getEnd(), xContent, false);
-				text.insertTextContent(range.getEnd(), xContent, false);
-				text.insertTextContent(range.getEnd(), xContent, false);
 				xContentProps.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
 			}
 			catch (Exception ignored) {}
@@ -215,6 +215,13 @@ public class Application {
 		return f.toPath().toUri().toString();
 	}
 
+	/**
+	 * Загружает текстовый документ.
+	 * TODO: исправить потенциальную ошибку с открытием нетекстовых файлов
+	 *
+	 * @param url URL-адрес файла
+	 * @return текстовый документ
+	 */
 	private XTextDocument loadFile(String url) throws Exception {
 		XComponentLoader xCompLoader = UnoRuntime
 				.queryInterface(XComponentLoader.class, xDesktop);
