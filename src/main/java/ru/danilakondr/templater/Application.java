@@ -241,8 +241,10 @@ public class Application {
 
 		XComponent xComp = xCompLoader.loadComponentFromURL(url, "_blank", 0, props);
 		XServiceInfo xServiceInfo = UnoRuntime.queryInterface(XServiceInfo.class, xComp);
-		if (!xServiceInfo.supportsService("com.sun.star.text.TextDocument"))
+		if (!xServiceInfo.supportsService("com.sun.star.text.TextDocument")) {
+			xComp.dispose();
 			throw new IllegalArgumentException("Invalid format");
+		}
 		XTextDocument doc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
 
 		return doc;
