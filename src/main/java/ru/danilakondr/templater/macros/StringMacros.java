@@ -1,60 +1,49 @@
 package ru.danilakondr.templater.macros;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 import org.apache.commons.text.lookup.StringLookup;
 
 /**
- * Велосипед для обработки файлов с макросами.
+ * Обёртка над классом Properties, которую можно использовать
+ * с StringSubstitutor.
  *
  * @author Данила А. Кондратенко
- * @since 0.2.1
+ * @since 0.3.2
  */
-public class StringMacros extends HashMap<String, String> implements StringLookup {
+public class StringMacros implements StringLookup {
+    private final Properties props;
+
     public StringMacros() {
-        super();
+        this.props = new Properties();
     }
 
     /**
-     * Загружает и обрабатывает файл по заданному пути.
+     * Загружает строковые макросы из файла по заданному пути.
      *
      * @param path путь к файлу
-     * @throws IOException ошибка при считывании
+     * @throws IOException ошибка при работе с файлом
      */
     public void loadFromFile(String path) throws IOException {
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(path)));
+        InputStreamReader reader = new InputStreamReader(
+                new FileInputStream(path),
+                StandardCharsets.UTF_8
+        );
 
-        try {
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                addVariable(line);
-            }
-        }
-        finally {
-            reader.close();
-        }
+        props.load(reader);
     }
 
     /**
-     * Добавляет переменную из одной строки.
+     * Загружает строковые макросы из словаря.
      *
-     * @param line строка
+     * @param x словарь
      */
-    private void addVariable(String line) {
-        int eqIndex = line.indexOf('=');
-        if (eqIndex > 0) {
-            super.put(
-                    line.substring(0, eqIndex).trim(),
-                    line.substring(eqIndex+1).trim()
-            );
-        }
+    public void loadFromMap(Map<String, String> x) {
+        x.forEach(this.props::setProperty);
     }
 
     @Override
@@ -78,6 +67,6 @@ public class StringMacros extends HashMap<String, String> implements StringLooku
             return new SimpleDateFormat(s.replaceAll("DATETIME\\((.*?)\\)", "$1"))
                     .format(date);
 
-        return get(s);
+        return props.getProperty(s);
     }
 }
