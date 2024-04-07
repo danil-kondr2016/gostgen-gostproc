@@ -1,18 +1,19 @@
 package ru.danilakondr.templater.processing;
 
+import com.sun.star.beans.Property;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XEnumerationAccess;
-import com.sun.star.container.XIndexAccess;
-import com.sun.star.container.XNameAccess;
+import com.sun.star.container.*;
 import com.sun.star.document.XEmbeddedObjectSupplier2;
 import com.sun.star.embed.EmbedUpdateModes;
 import com.sun.star.embed.XEmbeddedObject;
 import com.sun.star.text.*;
+import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -47,6 +48,8 @@ public class TextDocument {
      */
     private final HashMap<String, XTextSection> sections;
 
+    private final HashMap<String, XTextTable> tables;
+
     /**
      * Интерфейс-обработчик объектов.
      * @param <T> тип объекта
@@ -62,6 +65,7 @@ public class TextDocument {
                 .queryInterface(XTextRangeCompare.class, xDoc.getText());
         this.formulas = new HashMap<>();
         this.sections = new HashMap<>();
+        this.tables = new HashMap<>();
     }
 
     /**
@@ -73,8 +77,10 @@ public class TextDocument {
      */
     private boolean isRangeInside(XTextRange inner, XTextRange outer)
     {
-        return xCmp.compareRegionStarts(outer, inner) >= 0
-                && xCmp.compareRegionEnds(outer, inner) <= 0;
+        int a = xCmp.compareRegionStarts(outer, inner);
+        int b = xCmp.compareRegionEnds(outer, inner);
+        System.err.printf("  @C %+d %+d %n", a, b);
+        return a >= 0 && b <= 0;
     }
 
     /**
@@ -143,6 +149,60 @@ public class TextDocument {
     }
 
     /**
+     * Сканирует все таблицы в документе и выбирает те из них, которые не
+     * попадают в секции, начинающиеся с <code>eq:</code>
+     *
+     * @see TextDocument#tables
+     * @see TextDocument#scanAllFormulas
+     * @see TextDocument#scanAllSections
+     */
+    private void scanAllTables() throws Exception
+    {
+        if (!tables.isEmpty())
+            return;
+        if (sections.isEmpty())
+            scanAllSections();
+
+        XTextTablesSupplier xSup = UnoRuntime
+                .queryInterface(XTextTablesSupplier.class, xDoc);
+        XNameAccess textTables = xSup.getTextTables();
+        String[] textTablesNames = textTables.getElementNames();
+        HashMap<String, XTextTable> allTables = new HashMap<>();
+
+        XTextRangeCompare xCmp = UnoRuntime
+                .queryInterface(XTextRangeCompare.class, xDoc.getText());
+
+        for (String objId : textTablesNames) {
+            XTextTable xTable = UnoRuntime
+                    .queryInterface(XTextTable.class, textTables.getByName(objId));
+            allTables.put(objId, xTable);
+        }
+
+        HashSet<String> toRemove = new HashSet<>();
+        for (Map.Entry<String, XTextTable> f : allTables.entrySet()) {
+            XTextRange xTableRange = f.getValue().getAnchor();
+            XPropertySet xTableRangeProp = UnoRuntime
+                    .queryInterface(XPropertySet.class, xTableRange);
+            XTextSection xSection = UnoRuntime
+                    .queryInterface(XTextSection.class,
+                            xTableRangeProp.getPropertyValue("TextSection"));
+            if (xSection == null)
+                continue;
+
+            XNamed xSectionName = UnoRuntime
+                    .queryInterface(XNamed.class, xSection);
+            if (xSectionName.getName().startsWith("eq:"))
+                toRemove.add(f.getKey());
+        }
+
+        for (String x : allTables.keySet()) {
+            if (toRemove.contains(x))
+                continue;
+            tables.put(x, allTables.get(x));
+        }
+    }
+
+    /**
      * Обрабатывает все абзацы по порядку.
      *
      * @param processor обработчик абзаца
@@ -205,33 +265,12 @@ public class TextDocument {
         return this;
     }
 
-    /**
-     * Обрабатывает все таблицы в заданном отрезке текста.
-     *
-     * @param range отрезок
-     * @param processor обработчик таблицы
-     * @param progress счётчик прогресса
-     */
-    public TextDocument processTablesInsideRange(XTextRange range, ObjectProcessor<XTextTable> processor, ProgressCounter progress) throws Exception {
-        XTextTablesSupplier xSup = UnoRuntime
-                .queryInterface(XTextTablesSupplier.class, xDoc);
-        XNameAccess textTables = xSup.getTextTables();
-        String[] textTablesNames = textTables.getElementNames();
-        HashMap<String, XTextTable> textTablesInRange = new HashMap<>();
+    public TextDocument processTables(ObjectProcessor<XTextTable> processor, ProgressCounter progress) throws Exception {
+        if (tables.isEmpty())
+            scanAllTables();
 
-        for (String objId : textTablesNames) {
-            XTextTable xTable = UnoRuntime
-                    .queryInterface(XTextTable.class, textTables.getByName(objId));
-            XTextRange xTableRange = xTable.getAnchor();
-
-            if (isRangeInside(xTableRange, range)) {
-                textTablesInRange.put(objId, xTable);
-                progress.incrementTotal();
-            }
-        }
-
-        AtomicInteger i = new AtomicInteger(0);
-        textTablesInRange.forEach((k, v) -> {
+        progress.setTotal(tables.size());
+        tables.forEach((k, v) -> {
             progress.next();
             processor.process(v, xDoc);
         });

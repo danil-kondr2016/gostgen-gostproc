@@ -184,34 +184,15 @@ public class Application {
 				.substitute(new StringMacroSubstitutor(), stringMacros)
 				.substitute(new TableOfContentsInserter(), null);
 
-		TextDocument proc = new TextDocument(xDoc);
-		proc
+		TextDocument document = new TextDocument(xDoc);
+		document
 				.processFormulas(new MathFormulaFixProcessor(), new ProgressCounter("Fixing formulas"))
 				.processFormulas(new ObjectAligner(), new ProgressCounter("Aligning formulas properly"))
 				.processParagraphs(new NumberingStyleProcessor(), new ProgressCounter("Processing numbering style of paragraphs"))
 				.processImages(new ImageWidthFixProcessor(), new ProgressCounter("Fixing image widths"))
-				.processImages(new ObjectAligner(), new ProgressCounter("Fixing image alignments"));
-		ProgressCounter tablesCnt = new ProgressCounter("Processing tables");
-		List<XTextSection> tables = proc
-				.streamSections()
-				.filter(s -> UnoRuntime.queryInterface(XNamed.class, s).getName().startsWith("tbl:"))
-				.toList();
-		tables.forEach(x -> {
-			try {
-				String name  = UnoRuntime.queryInterface(XNamed.class, x).getName();
-				tablesCnt.setString(String.format("Processing tables inside section %s", name));
-				tablesCnt.setShowCurrent(false);
-				proc.processTablesInsideRange(
-						x.getAnchor(),
-						new TableStyleSetter(),
-						tablesCnt
-				);
-			} catch (com.sun.star.uno.Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
-
-		proc.updateAllIndexes();
+				.processImages(new ObjectAligner(), new ProgressCounter("Fixing image alignments"))
+				.processTables(new TableStyleSetter(), new ProgressCounter("Setting table styles"))
+				.updateAllIndexes();
 
 		System.out.println("Applying counters...");
 		substitutor.substitute(new StringMacroSubstitutor(), new DocumentCounter(xDoc).getCounter());
