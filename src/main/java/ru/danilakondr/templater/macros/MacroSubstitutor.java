@@ -7,6 +7,12 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XSearchDescriptor;
 import com.sun.star.util.XSearchable;
 
+/**
+ * Обработчик макросов в документе.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.0
+ */
 public class MacroSubstitutor {
     private final XTextDocument xDoc;
 
@@ -14,6 +20,9 @@ public class MacroSubstitutor {
         this.xDoc = xDoc;
     }
 
+    /**
+     * Функциональный интерфейс-обработчик макросов.
+     */
     @FunctionalInterface
     public interface Substitutor {
         void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter);
@@ -23,6 +32,12 @@ public class MacroSubstitutor {
         }
     }
 
+    /**
+     * Ищет и обрабатывает макросы в документе.
+     *
+     * @param proc обработчик макросов
+     * @param parameter параметр
+     */
     public MacroSubstitutor substitute(Substitutor proc, Object parameter) throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();

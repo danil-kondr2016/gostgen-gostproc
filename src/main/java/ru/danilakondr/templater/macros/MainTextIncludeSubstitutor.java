@@ -9,6 +9,12 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.regex.Pattern;
 
+/**
+ * Обработчик макроса %MAIN_TEXT%. Вставляет основной текст на нужном месте.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.0
+ */
 public class MainTextIncludeSubstitutor implements MacroSubstitutor.Substitutor {
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {

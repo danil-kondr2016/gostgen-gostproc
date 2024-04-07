@@ -6,6 +6,13 @@ import com.sun.star.text.XTextRange;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookup;
 
+/**
+ * Обработчик подстановки строк. Осуществляет подстановку на месте макросов
+ * вида %...%.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.0
+ */
 public class StringMacroSubstitutor implements MacroSubstitutor.Substitutor {
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {

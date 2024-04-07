@@ -11,8 +11,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.regex.Pattern;
 
+/**
+ * Обрабатывает макросы вида %INCLUDE(...)%. Вставляет содержимое заданных
+ * файлов на нужные места.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.0
+ */
 public class DocumentIncludeSubstitutor implements MacroSubstitutor.Substitutor {
-    private final Pattern macroPattern = Pattern.compile("%INCLUDE\\((.*)\\)%");
+    private static final Pattern macroPattern = Pattern.compile("%INCLUDE\\((.*)\\)%");
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
         String include = macroPattern.matcher(xRange.getString()).replaceAll("$1");
