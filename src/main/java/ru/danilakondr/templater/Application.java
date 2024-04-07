@@ -11,6 +11,7 @@ import com.sun.star.lang.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.Exception;
+import java.lang.IllegalArgumentException;
 import java.lang.RuntimeException;
 import java.util.HashMap;
 import java.util.List;
@@ -224,7 +225,6 @@ public class Application {
 
 	/**
 	 * Загружает текстовый документ.
-	 * TODO: исправить потенциальную ошибку с открытием нетекстовых файлов
 	 *
 	 * @param url URL-адрес файла
 	 * @return текстовый документ
@@ -239,6 +239,9 @@ public class Application {
 		props[0].Value = Boolean.TRUE;
 
 		XComponent xComp = xCompLoader.loadComponentFromURL(url, "_blank", 0, props);
+		XServiceInfo xServiceInfo = UnoRuntime.queryInterface(XServiceInfo.class, xComp);
+		if (!xServiceInfo.supportsService("com.sun.star.text.TextDocument"))
+			throw new IllegalArgumentException("Invalid format");
 		XTextDocument doc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
 
 		return doc;
