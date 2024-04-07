@@ -14,6 +14,9 @@ import com.sun.star.util.XSearchable;
  * @since 0.3.0
  */
 public class MacroSubstitutor {
+    /**
+     * Документ
+     */
     private final XTextDocument xDoc;
 
     public MacroSubstitutor(XTextDocument xDoc) {
