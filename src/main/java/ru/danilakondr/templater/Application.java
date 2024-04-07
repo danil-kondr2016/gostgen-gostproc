@@ -12,10 +12,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.Exception;
 import java.lang.RuntimeException;
+import java.util.HashMap;
 import java.util.List;
 
 import com.sun.star.util.XCloseable;
 import org.kohsuke.args4j.*;
+import org.kohsuke.args4j.spi.MapOptionHandler;
 import ru.danilakondr.templater.macros.*;
 import ru.danilakondr.templater.processing.*;
 
@@ -40,6 +42,9 @@ public class Application {
 
 	@Option(name="-e", aliases={"--embed-fonts"}, usage="Embed fonts")
 	private boolean embedFonts;
+
+	@Option(name="-D", usage="Specify macro", handler=MapOptionHandler.class)
+	private HashMap<String, String> macroOverrides;
 
 	@Option(name="-h", aliases=	{"--help", "-?"})
 	private boolean help;
@@ -128,6 +133,8 @@ public class Application {
 				System.err.printf("File %s not found, skipping\n", macroFile);
 			}
 		}
+
+		stringMacros.loadFromMap(macroOverrides);
 
 		fixFormulasAlignmentInMainFile(mainTextURL);
 
