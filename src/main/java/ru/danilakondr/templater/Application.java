@@ -258,16 +258,7 @@ public class Application {
 		if (templateURL == null)
 			throw new FileNotFoundException(templatePath);
 
-		XComponentLoader xCompLoader = UnoRuntime
-				.queryInterface(XComponentLoader.class, xDesktop);
-
-		PropertyValue[] props = new PropertyValue[1];
-		props[0] = new PropertyValue();
-		props[0].Name = "Hidden";
-		props[0].Value = Boolean.TRUE;
-
-		XComponent xComp = xCompLoader.loadComponentFromURL(templateURL, "_blank", 0, props);
-		xDoc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
+		this.xDoc = loadFile(templateURL);
 	}
 
 	/**
