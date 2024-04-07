@@ -13,10 +13,11 @@ import java.util.regex.Pattern;
 
 /**
  * Обрабатывает макросы вида %INCLUDE(...)%. Вставляет содержимое заданных
- * файлов на нужные места.
+ * файлов на нужные места. Обработка %INCLUDE(...)% может происходить несколько
+ * раз.
  *
  * @author Данила А. Кондратенко
- * @since 0.3.0
+ * @since 0.3.0, 0.1.5
  */
 public class DocumentIncludeSubstitutor implements MacroSubstitutor.Substitutor {
     private static final Pattern macroPattern = Pattern.compile("%INCLUDE\\((.*)\\)%");
