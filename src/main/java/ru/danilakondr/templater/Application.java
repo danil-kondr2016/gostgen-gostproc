@@ -228,6 +228,7 @@ public class Application {
 	 *
 	 * @param url URL-адрес файла
 	 * @return текстовый документ
+	 * @since 0.3.2
 	 */
 	private XTextDocument loadFile(String url) throws Exception {
 		XComponentLoader xCompLoader = UnoRuntime
@@ -247,6 +248,11 @@ public class Application {
 		return doc;
 	}
 
+	/**
+	 * Загружает шаблон.
+	 *
+	 * @since 0.1.0
+	 */
 	private void loadTemplate() throws Exception {
 		String templateURL = getURI(templatePath, true);
 		if (templateURL == null)
@@ -264,6 +270,11 @@ public class Application {
 		xDoc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
 	}
 
+	/**
+	 * Сохраняет полученный документ. Если нужно, внедряет шрифты.
+	 *
+	 * @since 0.1.0
+	 */
 	private void saveDocument() throws Exception {
 		String outputURL = getURI(outputPath, false);
 		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
@@ -283,6 +294,8 @@ public class Application {
 
 	/**
 	 * Завершает приложение.
+	 *
+	 * @since 0.1.0
 	 */
 	public void terminate() {
 		if (this.success) {
@@ -304,7 +317,5 @@ public class Application {
 		finally {
 			System.out.println("Terminated");
 		}
-
-		//xDesktop.terminate();
 	}
 }
