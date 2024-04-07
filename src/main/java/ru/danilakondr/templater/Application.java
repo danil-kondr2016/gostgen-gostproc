@@ -48,7 +48,7 @@ public class Application {
 	private HashMap<String, String> macroOverrides;
 
 	@Option(name="-h", aliases=	{"--help", "-?"})
-	private boolean help;
+	private boolean shouldShowHelp;
 
 	private final StringMacros stringMacros;
     private XDesktop xDesktop;
@@ -80,7 +80,7 @@ public class Application {
 			System.exit(-1);
 		}
 
-		if (app.help) {
+		if (app.shouldShowHelp) {
 			System.out.println("Usage:");
 			System.out.print("templater ");
 			parser.printSingleLineUsage(System.out);
