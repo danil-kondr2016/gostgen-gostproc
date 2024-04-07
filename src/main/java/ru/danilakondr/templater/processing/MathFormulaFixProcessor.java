@@ -1,12 +1,15 @@
 package ru.danilakondr.templater.processing;
 
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.text.TextContentAnchorType;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
-import java.util.function.Consumer;
-
+/**
+ * Обработчик формул.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.0, 0.1.0
+ */
 public class MathFormulaFixProcessor implements TextDocument.ObjectProcessor<Object> {
     @Override
     public void process(Object object, XTextDocument xDoc) {

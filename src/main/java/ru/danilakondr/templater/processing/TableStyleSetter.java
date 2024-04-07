@@ -9,6 +9,12 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.function.Consumer;
 
+/**
+ * Установщик стилей таблиц.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.0, 0.2.8
+ */
 public class TableStyleSetter implements TextDocument.ObjectProcessor<XTextTable> {
     public static final int TABLE_LINE_WIDTH = 17; // around 1/2 * (25.4/72) mm
     @Override

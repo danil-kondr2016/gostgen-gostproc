@@ -7,6 +7,15 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.function.Consumer;
 
+/**
+ * Обработчик изображений. Изменяет размеры изображений таким образом, чтобы
+ * они помещались целиком на страницу. Если ширина превышает 16,5 см, то высота
+ * подстраивается под ширину. Если высота превышает 27,7 см, то ширина
+ * подстраивается под высоту.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.0, 0.2.6
+ */
 public class ImageWidthFixProcessor implements TextDocument.ObjectProcessor<Object> {
     @Override
     public void process(Object oImage, XTextDocument xDoc) {

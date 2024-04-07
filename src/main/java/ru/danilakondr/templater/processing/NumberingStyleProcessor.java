@@ -13,6 +13,14 @@ import com.sun.star.uno.UnoRuntime;
 
 import java.util.function.Consumer;
 
+/**
+ * Обработчик стилей нумерации. Изначально был отдельным процессором, который
+ * содержал в себе документ, однако позже реализован в виде функционального
+ * класса-обработчика.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.0, 0.2.7
+ */
 public class NumberingStyleProcessor implements TextDocument.ObjectProcessor<XTextContent> {
     @Override
     public void process(XTextContent xParagraph, XTextDocument xDoc) {

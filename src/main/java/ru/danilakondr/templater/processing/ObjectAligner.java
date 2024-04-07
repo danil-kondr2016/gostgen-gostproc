@@ -5,6 +5,12 @@ import com.sun.star.style.ParagraphAdjust;
 import com.sun.star.text.*;
 import com.sun.star.uno.UnoRuntime;
 
+/**
+ * Выравниватель объектов.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.2
+ */
 public class ObjectAligner implements TextDocument.ObjectProcessor<Object> {
     @Override
     public void process(Object object, XTextDocument xDoc) {

@@ -2,6 +2,12 @@ package ru.danilakondr.templater.processing;
 
 import java.io.PrintStream;
 
+/**
+ * Счётчик прогресса.
+ *
+ * @author Данила А. Кондратенко
+ * @since 0.3.1
+ */
 public class ProgressCounter {
     private int current, total;
     private boolean showProgress = true, showCurrent = true, showTotal = true;
