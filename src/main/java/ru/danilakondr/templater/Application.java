@@ -131,6 +131,7 @@ public class Application {
 		}
 		catch (RuntimeException e) {
 			System.err.printf("%s%n", e.getMessage());
+			e.printStackTrace(System.err);
 		}
 		catch (FileNotFoundException e) {
 			System.err.printf("%s: file not found%n", e.getMessage());
@@ -212,6 +213,9 @@ public class Application {
 
 		proc.updateAllIndexes();
 
+		System.out.println("Applying counters...");
+		substitutor.substitute(new StringMacroSubstitutor(), new DocumentCounter(xDoc).getCounter());
+
 		this.success = true;
 	}
 
@@ -246,7 +250,7 @@ public class Application {
 		}
 	}
 
-	private void askForOverwrite(String outputPath) throws Exception {
+	private void askForOverwrite(String outputPath) {
 		boolean selected = false;
 		try (Scanner sc = new Scanner(System.in)) {
 			System.out.printf("Overwrite %s (Y/N)? ", outputPath);

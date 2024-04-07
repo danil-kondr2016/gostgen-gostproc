@@ -43,6 +43,9 @@ public class StringMacros implements StringLookup {
      * @param x словарь
      */
     public void loadFromMap(Map<String, String> x) {
+        if (x == null)
+            return;
+
         x.forEach(this.props::setProperty);
     }
 
