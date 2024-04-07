@@ -32,6 +32,10 @@ application {
     mainClass = 'ru.danilakondr.templater.Application'
 }
 
+run {
+    standardInput = System.in
+}
+
 tasks.register('findLibreOffice', Copy) {
     Properties pLOProp = new Properties()
     File fLOProp = Paths.get(

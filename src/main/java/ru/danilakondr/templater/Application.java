@@ -3,6 +3,7 @@ package ru.danilakondr.templater;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNamed;
+import com.sun.star.scanner.XScannerManager;
 import com.sun.star.text.*;
 import com.sun.star.frame.*;
 import com.sun.star.uno.*;
@@ -10,17 +11,23 @@ import com.sun.star.lang.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.Exception;
 import java.lang.IllegalArgumentException;
 import java.lang.RuntimeException;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
 import com.sun.star.util.XCloseable;
 import org.kohsuke.args4j.*;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import ru.danilakondr.templater.macros.*;
 import ru.danilakondr.templater.processing.*;
+
+import javax.swing.*;
 
 /**
  * Главный класс постобработчика документов с использованием LibreOffice.
@@ -43,6 +50,9 @@ public class Application {
 
 	@Option(name="-e", aliases={"--embed-fonts"}, usage="Embed fonts")
 	private boolean embedFonts;
+
+	@Option(name="-f", aliases={"--force", "--overwrite"}, usage="Overwrite output file")
+	private boolean overwrite;
 
 	@Option(name="-D", usage="Specify macro", handler=MapOptionHandler.class)
 	private HashMap<String, String> macroOverrides;
@@ -95,6 +105,18 @@ public class Application {
 			xContext = LibreOffice.bootstrap();
 			app.setContext(xContext);
 		}
+		catch (LibreOfficeException e) {
+			System.err.println(e.getMessage());
+		}
+		catch (IllegalArgumentException e) {
+			System.err.println("Invalid argument: " + e.getMessage());
+		}
+		catch (FileNotFoundException e) {
+			System.err.printf("%s: file not found%n", e.getMessage());
+		}
+		catch (IOException e) {
+			System.err.printf("%s%n", e);
+		}
 		catch (Exception e) {
 			e.printStackTrace(System.err);
 			System.exit(-1);
@@ -103,6 +125,15 @@ public class Application {
 		int status = 0;
 		try {
 			app.run();
+		}
+		catch (IllegalArgumentException e) {
+			System.err.println("Invalid argument: " + e.getMessage());
+		}
+		catch (RuntimeException e) {
+			System.err.printf("%s%n", e.getMessage());
+		}
+		catch (FileNotFoundException e) {
+			System.err.printf("%s: file not found%n", e.getMessage());
 		}
 		catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -120,6 +151,7 @@ public class Application {
 	 * @since 0.1.0
 	 */
 	public void run() throws Exception {
+		this.checkPaths();
 		this.createDesktop();
 
 		String mainTextURL = getURI(mainTextPath, true);
@@ -181,6 +213,62 @@ public class Application {
 		proc.updateAllIndexes();
 
 		this.success = true;
+	}
+
+	private void checkPaths() throws Exception {
+		String mainTextURL = getURI(mainTextPath, true);
+		String templateURL = getURI(templatePath, true);
+
+		if (templateURL == null)
+			throw new FileNotFoundException(templatePath);
+		if (mainTextURL == null)
+			throw new FileNotFoundException(mainTextPath);
+		if (outputPath == null)
+			throw new IllegalArgumentException("Output file has not been specified");
+
+		String outputURL = getURI(outputPath, false);
+		assert outputURL != null;
+
+		if (mainTextURL.equals(outputURL))
+			throw new IllegalArgumentException("Main text file and output file cannot have equal names");
+		if (templateURL.equals(outputURL))
+			throw new IllegalArgumentException("Template and output file cannot have equal names");
+		if (templateURL.equals(mainTextURL))
+			throw new IllegalArgumentException("Template and main text file cannot have equal names");
+
+        if (Path.of(new URI(outputURL)).toFile().exists() && !overwrite) {
+			askForOverwrite(outputPath);
+		}
+	}
+
+	private void askForOverwrite(String outputPath) throws Exception {
+		boolean selected = false;
+		try (Scanner sc = new Scanner(System.in)) {
+			System.out.printf("Overwrite %s (Y/N)? ", outputPath);
+			while (!selected) {
+				String choice = sc.nextLine().trim();
+
+				if (choice.equalsIgnoreCase("y")) {
+					selected = true;
+					overwrite = true;
+				} else if (choice.equalsIgnoreCase("n")) {
+					selected = true;
+					overwrite = false;
+				} else {
+					throw new IllegalArgumentException("Invalid choice: " + choice);
+				}
+			}
+			System.out.println();
+		}
+		catch (IllegalArgumentException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		if (!overwrite) {
+			throw new RuntimeException("Could not overwrite existing file");
+		}
 	}
 
 	/**
@@ -315,13 +403,11 @@ public class Application {
 		}
 
 		try {
-			this.closeDocument();
+			if (xDoc != null)
+				this.closeDocument();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
-		}
-		finally {
-			System.out.println("Terminated");
 		}
 	}
 }
