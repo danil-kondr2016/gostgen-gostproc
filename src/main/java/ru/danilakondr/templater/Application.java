@@ -116,6 +116,8 @@ public class Application {
 
 	/**
 	 * Запуск приложения.
+	 *
+	 * @since 0.1.0
 	 */
 	public void run() throws Exception {
 		this.createDesktop();
@@ -207,6 +209,8 @@ public class Application {
 
 	/**
 	 * Создаёт &laquo;рабочий стол&raquo; LibreOffice.
+	 *
+	 * @since 0.1.0
 	 */
 	private void createDesktop() throws java.lang.Exception {
 		Object oDesktop = xMCF.createInstanceWithContext(
