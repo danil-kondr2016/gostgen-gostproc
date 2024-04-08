@@ -1,9 +1,12 @@
 package ru.danilakondr.templater.processing;
 
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.container.XNamed;
 import com.sun.star.table.BorderLine;
 import com.sun.star.table.TableBorder;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextTable;
 import com.sun.star.uno.UnoRuntime;
 
@@ -19,6 +22,9 @@ public class TableStyleSetter implements TextDocument.ObjectProcessor<XTextTable
     public static final int TABLE_LINE_WIDTH = 17; // around 1/2 * (25.4/72) mm
     @Override
     public void process(XTextTable xTable, XTextDocument xDoc) {
+        if (unprocessed(xTable))
+            return;
+
         XPropertySet xTableProp = UnoRuntime
                 .queryInterface(XPropertySet.class, xTable);
         TableBorder tableBorder = new TableBorder();
@@ -51,6 +57,26 @@ public class TableStyleSetter implements TextDocument.ObjectProcessor<XTextTable
             xTableProp.setPropertyValue("TableBorder", tableBorder);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private boolean unprocessed(XTextTable xTable) {
+        XTextRange xTableRange = xTable.getAnchor();
+        XPropertySet xTableRangeProp = UnoRuntime
+                .queryInterface(XPropertySet.class, xTableRange);
+        try {
+            XTextSection xSection = UnoRuntime
+                    .queryInterface(XTextSection.class,
+                            xTableRangeProp.getPropertyValue("TextSection"));
+            if (xSection == null)
+                return false;
+
+            XNamed xSectionName = UnoRuntime
+                    .queryInterface(XNamed.class, xSection);
+            return xSectionName.getName().startsWith("unproc-tbl:");
+        }
+        catch (Exception e) {
+            return false;
         }
     }
 }
