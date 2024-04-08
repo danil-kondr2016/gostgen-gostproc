@@ -169,9 +169,6 @@ public class TextDocument {
         String[] textTablesNames = textTables.getElementNames();
         HashMap<String, XTextTable> allTables = new HashMap<>();
 
-        XTextRangeCompare xCmp = UnoRuntime
-                .queryInterface(XTextRangeCompare.class, xDoc.getText());
-
         for (String objId : textTablesNames) {
             XTextTable xTable = UnoRuntime
                     .queryInterface(XTextTable.class, textTables.getByName(objId));
@@ -298,17 +295,5 @@ public class TextDocument {
             throw new RuntimeException(e);
         }
         return this;
-    }
-
-    /**
-     * Возвращает поток с секциями. Необходимо для обработки таблиц
-     * внутри секций с названиями на <code>tbl:</code>.
-     * @return поток с секциями
-     */
-    public Stream<XTextSection> streamSections() throws Exception {
-        if (sections.isEmpty())
-            scanAllSections();
-
-        return sections.values().stream();
     }
 }
