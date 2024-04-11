@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  * @author Данила А. Кондратенко
  * @since 0.3.0
  */
-public class TextDocument implements ProgressInformer {
+public class TextDocument {
     /**
      * Документ.
      */
@@ -266,6 +266,5 @@ public class TextDocument implements ProgressInformer {
         catch (java.lang.Exception e) {
             throw new RuntimeException(e);
         }
-        return this;
     }
 }
