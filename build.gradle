@@ -1,12 +1,10 @@
-import java.nio.file.Paths
-
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
 }
 
 group = 'ru.danilakondr.templater'
-version = '0.3.6'
+version = '0.4.0'
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -14,7 +12,7 @@ repositories {
 }
 
 dependencies {
-	implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'org.apache.commons:commons-lang3:3.14.0'
     implementation 'org.apache.commons:commons-text:1.11.0'
     implementation 'args4j:args4j:2.37'
@@ -38,7 +36,7 @@ run {
 
 tasks.register('findLibreOffice', Copy) {
     Properties pLOProp = new Properties()
-    File fLOProp = Paths.get(
+    File fLOProp = java.nio.file.Path.of(
             rootDir.getCanonicalPath(),
             "libreoffice.properties")
             .toFile()
@@ -54,16 +52,16 @@ tasks.register('findLibreOffice', Copy) {
     if (libreOfficeHome == null) {
         String platform = System.getProperty("os.name").toLowerCase()
         if (platform.startsWith("windows")) {
-            var root = Paths.get(System.getenv("WINDIR"), "..")
+            var root = java.nio.file.Path.of(System.getenv("WINDIR"), "..")
                     .normalize()
-                    .toString();
-            var p1 = Paths.get(root,
+                    .toString()
+            var p1 = java.nio.file.Path.of(root,
                     "Program Files",
                     "LibreOffice", "program", "classes")
                     .toFile()
 
             if (!p1.exists()) {
-                var p2 = Paths.get(root,
+                var p2 = java.nio.file.Path.of(root,
                         "Program Files (x86)",
                         "LibreOffice", "program", "classes")
                         .toFile()
@@ -72,12 +70,12 @@ tasks.register('findLibreOffice', Copy) {
             }
             else libreOfficeHome = p1.getCanonicalPath()
         } else if (platform.startsWith("linux")) {
-            var libLO = Paths.get(
+            var libLO = java.nio.file.Path.of(
                     "usr", "lib", "libreoffice", "program", "classes")
                     .toFile()
 
             if (!libLO.exists()) {
-                var opt = Paths.get("opt").toFile()
+                var opt = java.nio.file.Path.of("opt").toFile()
                 libreOfficeHome = opt.listFiles()
                         .findAll { it.toPath().getFileName()
                                 .startsWith("libreoffice") }
@@ -85,7 +83,7 @@ tasks.register('findLibreOffice', Copy) {
                         .max()
             }
         } else if (platform.startsWith("mac os x")) {
-            var resJava = Paths.get(
+            var resJava = java.nio.file.Path.of(
                     "Applications", "LibreOffice.app",
                     "Contents", "Resources", "java"
             ).toFile()
