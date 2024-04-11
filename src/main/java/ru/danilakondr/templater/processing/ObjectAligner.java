@@ -23,7 +23,7 @@ public class ObjectAligner implements TextDocument.ObjectProcessor<Object> {
                 return;
 
             XTextCursor xCursor = xRange.getText().createTextCursorByRange(xRange);
-            if (hasTextAroundFormula(xRange, xDoc))
+            if (hasTextAroundObject(xRange))
                 return;
 
             xCursor.gotoRange(xRange, true);
@@ -56,7 +56,7 @@ public class ObjectAligner implements TextDocument.ObjectProcessor<Object> {
         }
     }
 
-    private boolean hasTextAroundFormula(XTextRange xRange, XTextDocument xDoc) {
+    private boolean hasTextAroundObject(XTextRange xRange) {
         XParagraphCursor xParCursor = UnoRuntime
                 .queryInterface(XParagraphCursor.class,
                         xRange.getText().createTextCursorByRange(xRange));
