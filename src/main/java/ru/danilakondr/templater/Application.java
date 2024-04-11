@@ -185,14 +185,13 @@ public class Application {
 				.substitute(new TableOfContentsInserter(), null);
 
 		TextDocument document = new TextDocument(xDoc);
-		document
-				.processFormulas(new MathFormulaFixProcessor(), new ProgressCounter("Fixing formulas"))
-				.processFormulas(new ObjectAligner(), new ProgressCounter("Aligning formulas properly"))
-				.processParagraphs(new NumberingStyleProcessor(), new ProgressCounter("Processing numbering style of paragraphs"))
-				.processImages(new ImageWidthFixProcessor(), new ProgressCounter("Fixing image widths"))
-				.processImages(new ObjectAligner(), new ProgressCounter("Fixing image alignments"))
-				.processTables(new TableStyleSetter(), new ProgressCounter("Setting table styles"))
-				.updateAllIndexes();
+		document.processFormulas(new MathFormulaFixProcessor(), new DefaultProgressInformer("Fixing formulas"));
+		document.processFormulas(new ObjectAligner(), new DefaultProgressInformer("Aligning formulas properly"));
+		document.processParagraphs(new NumberingStyleProcessor(), new DefaultProgressInformer("Processing numbering style of paragraphs"));
+		document.processImages(new ImageWidthFixProcessor(), new DefaultProgressInformer("Fixing image widths"));
+		document.processImages(new ObjectAligner(), new DefaultProgressInformer("Fixing image alignments"));
+		document.processTables(new TableStyleSetter(), new DefaultProgressInformer("Setting table styles"));
+		document.updateAllIndexes();
 
 		System.out.println("Applying counters...");
 		substitutor.substitute(new StringMacroSubstitutor(), new DocumentCounter(xDoc).getCounter());
@@ -279,7 +278,7 @@ public class Application {
 				xContentProps.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
 			}
 			catch (Exception ignored) {}
-		}, new ProgressCounter("Processing formula in main file"));
+		}, new DefaultProgressInformer("Processing formula in main file"));
 
 		xMainDocStorable.store();
 		xMainDocCloseable.close(true);

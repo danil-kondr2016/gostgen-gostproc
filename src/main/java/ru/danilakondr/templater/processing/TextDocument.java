@@ -10,6 +10,7 @@ import com.sun.star.text.*;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
+import org.w3c.dom.ls.LSProgressEvent;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,15 +25,11 @@ import java.util.stream.Stream;
  * @author Данила А. Кондратенко
  * @since 0.3.0
  */
-public class TextDocument {
+public class TextDocument implements ProgressInformer {
     /**
      * Документ.
      */
     private final XTextDocument xDoc;
-    /**
-     * Сравнитель текстовых отрезков.
-     */
-    private final XTextRangeCompare xCmp;
     /**
      * GUID типа объекта формул.
      */
@@ -61,26 +58,9 @@ public class TextDocument {
 
     public TextDocument(XTextDocument xDoc) {
         this.xDoc = xDoc;
-        this.xCmp = UnoRuntime
-                .queryInterface(XTextRangeCompare.class, xDoc.getText());
         this.formulas = new HashMap<>();
         this.sections = new HashMap<>();
         this.tables = new HashMap<>();
-    }
-
-    /**
-     * Проверяет, находится ли inner внутри outer.
-     *
-     * @param inner предполагаемый внутренний отрезок
-     * @param outer предполагаемый внешний отрезок
-     * @return true, если inner внутри outer; false в противном случае
-     */
-    private boolean isRangeInside(XTextRange inner, XTextRange outer)
-    {
-        int a = xCmp.compareRegionStarts(outer, inner);
-        int b = xCmp.compareRegionEnds(outer, inner);
-        System.err.printf("  @C %+d %+d %n", a, b);
-        return a >= 0 && b <= 0;
     }
 
     /**
@@ -205,21 +185,19 @@ public class TextDocument {
      * @param processor обработчик абзаца
      * @param progress счётчик прогресса
      */
-    public TextDocument processParagraphs(ObjectProcessor<XTextContent> processor, ProgressCounter progress) throws Exception {
+    public void  processParagraphs(ObjectProcessor<XTextContent> processor, ProgressInformer progress) throws Exception {
         XEnumerationAccess xEnumAccess = UnoRuntime
                 .queryInterface(XEnumerationAccess.class, xDoc.getText());
         XEnumeration xEnum = xEnumAccess.createEnumeration();
 
-        progress.setShowTotal(false);
+        int i = 0;
         while (xEnum.hasMoreElements()) {
             XTextContent xParagraph = UnoRuntime
                     .queryInterface(XTextContent.class, xEnum.nextElement());
 
-            progress.next();
+            progress.inform(++i, -1);
             processor.process(xParagraph, xDoc);
         }
-
-        return this;
     }
 
     /**
@@ -228,19 +206,17 @@ public class TextDocument {
      * @param processor обработчик изображения
      * @param progress счётчик прогресса
      */
-    public TextDocument processImages(ObjectProcessor<Object> processor, ProgressCounter progress) throws Exception {
+    public void processImages(ObjectProcessor<Object> processor, ProgressInformer progress) throws Exception {
         XNameAccess graphicObjects = UnoRuntime
                 .queryInterface(XTextGraphicObjectsSupplier.class, xDoc)
                 .getGraphicObjects();
         String[] names = graphicObjects.getElementNames();
 
-        progress.setTotal(names.length);
+        int i = 0;
         for (String objId : names) {
-            progress.next();
+            progress.inform(++i, names.length);
             processor.process(graphicObjects.getByName(objId), xDoc);
         }
-
-        return this;
     }
 
     /**
@@ -249,36 +225,32 @@ public class TextDocument {
      * @param processor обработчик формулы
      * @param progress счётчик прогресса
      */
-    public TextDocument processFormulas(ObjectProcessor<Object> processor, ProgressCounter progress) throws Exception {
+    public void processFormulas(ObjectProcessor<Object> processor, ProgressInformer progress) throws Exception {
         if (formulas.isEmpty())
             scanAllFormulas();
 
-        progress.setTotal(formulas.size());
+        AtomicInteger i = new AtomicInteger(0);
         formulas.forEach((k, v) -> {
-            progress.next();
+            progress.inform(i.incrementAndGet(), formulas.size());
             processor.process(v, xDoc);
         });
-
-        return this;
     }
 
-    public TextDocument processTables(ObjectProcessor<XTextTable> processor, ProgressCounter progress) throws Exception {
+    public void processTables(ObjectProcessor<XTextTable> processor, ProgressInformer progress) throws Exception {
         if (tables.isEmpty())
             scanAllTables();
 
-        progress.setTotal(tables.size());
+        AtomicInteger i = new AtomicInteger(0);
         tables.forEach((k, v) -> {
-            progress.next();
+            progress.inform(i.incrementAndGet(), tables.size());
             processor.process(v, xDoc);
         });
-
-        return this;
     }
 
     /**
      * Обновляет все индексы в документе.
      */
-    public TextDocument updateAllIndexes() {
+    public void updateAllIndexes() {
         XDocumentIndexesSupplier xSup = UnoRuntime
                 .queryInterface(XDocumentIndexesSupplier.class, xDoc);
         XIndexAccess xIndexes = xSup.getDocumentIndexes();
