@@ -10,8 +10,6 @@ import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextTable;
 import com.sun.star.uno.UnoRuntime;
 
-import java.util.function.Consumer;
-
 /**
  * Установщик стилей таблиц.
  *
@@ -22,7 +20,7 @@ public class TableStyleSetter implements TextDocument.ObjectProcessor<XTextTable
     public static final int TABLE_LINE_WIDTH = 17; // around 1/2 * (25.4/72) mm
     @Override
     public void process(XTextTable xTable, XTextDocument xDoc) {
-        if (unprocessed(xTable))
+        if (isNotToBeProcessed(xTable))
             return;
 
         XPropertySet xTableProp = UnoRuntime
@@ -60,7 +58,7 @@ public class TableStyleSetter implements TextDocument.ObjectProcessor<XTextTable
         }
     }
 
-    private boolean unprocessed(XTextTable xTable) {
+    private boolean isNotToBeProcessed(XTextTable xTable) {
         XTextRange xTableRange = xTable.getAnchor();
         XPropertySet xTableRangeProp = UnoRuntime
                 .queryInterface(XPropertySet.class, xTableRange);
