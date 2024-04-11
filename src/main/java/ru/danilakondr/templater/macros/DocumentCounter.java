@@ -17,7 +17,7 @@ import org.apache.commons.text.lookup.StringLookup;
 public class DocumentCounter {
     private final XTextDocument xDoc;
 
-    public DocumentCounter(XTextDocument xDoc) {
+    private DocumentCounter(XTextDocument xDoc) {
         this.xDoc = xDoc;
     }
 
@@ -39,12 +39,13 @@ public class DocumentCounter {
         }
     }
 
-    public StringLookup getCounter() {
+    public static StringLookup getCounter(XTextDocument xDoc) {
+        DocumentCounter cnt = new DocumentCounter(xDoc);
         Counter x = new Counter();
 
-        x.n_pages = getPageCount();
-        x.n_figures = getFigureCount();
-        x.n_tables = getTableCount();
+        x.n_pages = cnt.getPageCount();
+        x.n_figures = cnt.getFigureCount();
+        x.n_tables = cnt.getTableCount();
 
         return x;
     }

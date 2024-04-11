@@ -194,7 +194,7 @@ public class Application {
 		document.updateAllIndexes();
 
 		System.out.println("Applying counters...");
-		substitutor.substitute(new StringMacroSubstitutor(), new DocumentCounter(xDoc).getCounter());
+		substitutor.substitute(new StringMacroSubstitutor(), DocumentCounter.getCounter(xDoc));
 
 		this.success = true;
 	}
