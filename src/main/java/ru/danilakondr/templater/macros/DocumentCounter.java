@@ -22,9 +22,15 @@ public class DocumentCounter {
     }
 
     private static class Counter implements StringLookup {
-        public int n_pages = 0;
-        public int n_figures = 0;
-        public int n_tables = 0;
+        private int n_pages = 0;
+        private int n_figures = 0;
+        private int n_tables = 0;
+
+        public Counter(int n_pages, int n_figures, int n_tables) {
+            this.n_figures = n_figures;
+            this.n_pages = n_pages;
+            this.n_tables = n_tables;
+        }
 
         @Override
         public String lookup(String s) {
@@ -41,11 +47,11 @@ public class DocumentCounter {
 
     public static StringLookup getCounter(XTextDocument xDoc) {
         DocumentCounter cnt = new DocumentCounter(xDoc);
-        Counter x = new Counter();
-
-        x.n_pages = cnt.getPageCount();
-        x.n_figures = cnt.getFigureCount();
-        x.n_tables = cnt.getTableCount();
+        Counter x = new Counter(
+                cnt.getPageCount(),
+                cnt.getFigureCount(),
+                cnt.getTableCount()
+        );
 
         return x;
     }
