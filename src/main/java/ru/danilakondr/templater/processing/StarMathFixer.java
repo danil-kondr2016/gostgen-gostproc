@@ -73,8 +73,14 @@ public class StarMathFixer {
 
         f = fixAccents(f);
         f = fixBraces(f);
-        
         f = fixCharacters(f);
+        f = fixOperators(f);
+
+        return f;
+    }
+
+    private static String fixOperators(String formula) {
+        String f = formula;
 
         f = left.matcher(f).replaceAll("$1 {} $2");
         f = right.matcher(f).replaceAll("$1 {} $2");
@@ -82,7 +88,7 @@ public class StarMathFixer {
         return f;
     }
 
-    public static String fixCharacters(String formula) {
+    private static String fixCharacters(String formula) {
         StringBuilder f = new StringBuilder();
         Pattern symbol = Pattern.compile("([\\u0370-\\u03FF]|[\\u2200-\\u22FF]|[\\x{1D400}-\\x{1D7FF}])");
         Matcher m = symbol.matcher(formula);
