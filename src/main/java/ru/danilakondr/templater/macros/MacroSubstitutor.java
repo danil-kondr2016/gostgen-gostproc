@@ -41,7 +41,7 @@ public class MacroSubstitutor {
      * @param proc обработчик макросов
      * @param parameter параметр
      */
-    public MacroSubstitutor substitute(Substitutor proc, Object parameter) throws Exception {
+    public void substitute(Substitutor proc, Object parameter) throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
 
@@ -56,7 +56,5 @@ public class MacroSubstitutor {
                 proc.substitute(xDoc, xFound, parameter);
             }
         }
-
-        return this;
     }
 }

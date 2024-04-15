@@ -180,9 +180,8 @@ public class Application {
 		substitutor.substitute(new MainTextIncludeSubstitutor(), mainTextURL);
 		for (int i = 0; i < 16; i++)
 			substitutor.substitute(new DocumentIncludeSubstitutor(), null);
-		substitutor
-				.substitute(new StringMacroSubstitutor(), stringMacros)
-				.substitute(new TableOfContentsInserter(), null);
+		substitutor.substitute(new StringMacroSubstitutor(), stringMacros);
+		substitutor.substitute(new TableOfContentsInserter(), null);
 
 		TextDocument document = new TextDocument(xDoc);
 		document.processFormulas(new MathFormulaFixProcessor(), new DefaultProgressInformer("Fixing formulas"));
