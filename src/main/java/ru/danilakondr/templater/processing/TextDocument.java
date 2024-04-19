@@ -39,12 +39,6 @@ public class TextDocument {
      * вызове метода processFormulas().
      */
     private final HashMap<String, Object> formulas;
-    /**
-     * Список всех секций в документе. Должен инициализирваться при первом
-     * вызове метода streamSections().
-     */
-    private final HashMap<String, XTextSection> sections;
-
     private final HashMap<String, XTextTable> tables;
 
     /**
@@ -59,7 +53,6 @@ public class TextDocument {
     public TextDocument(XTextDocument xDoc) {
         this.xDoc = xDoc;
         this.formulas = new HashMap<>();
-        this.sections = new HashMap<>();
         this.tables = new HashMap<>();
     }
 
@@ -104,44 +97,16 @@ public class TextDocument {
     }
 
     /**
-     * Сканирует все секции в документе. Метод вызывается один раз.
-     * Сканирование делается от греха подальше, чтобы не произошло глубокой
-     * медитации, как в случае с формулами.
-     * <p>
-     * Сохраняет все секции в <code>sections</code>.
-     *
-     * @see TextDocument#sections
-     * @see TextDocument#scanAllFormulas
-     */
-    private void scanAllSections() throws Exception {
-        if (!sections.isEmpty())
-            return;
-
-        XTextSectionsSupplier xSup = UnoRuntime
-                .queryInterface(XTextSectionsSupplier.class, xDoc);
-        XNameAccess xSections = xSup.getTextSections();
-
-        for (String objId : xSections.getElementNames()) {
-            XTextSection xTextSection = UnoRuntime
-                    .queryInterface(XTextSection.class, xSections.getByName(objId));
-            this.sections.put(objId, xTextSection);
-        }
-    }
-
-    /**
      * Сканирует все таблицы в документе и выбирает те из них, которые не
      * попадают в секции, начинающиеся с <code>eq:</code>
      *
      * @see TextDocument#tables
      * @see TextDocument#scanAllFormulas
-     * @see TextDocument#scanAllSections
      */
     private void scanAllTables() throws Exception
     {
         if (!tables.isEmpty())
             return;
-        if (sections.isEmpty())
-            scanAllSections();
 
         XTextTablesSupplier xSup = UnoRuntime
                 .queryInterface(XTextTablesSupplier.class, xDoc);
@@ -185,7 +150,7 @@ public class TextDocument {
      * @param processor обработчик абзаца
      * @param progress счётчик прогресса
      */
-    public void  processParagraphs(ObjectProcessor<XTextContent> processor, ProgressInformer progress) throws Exception {
+    public void processParagraphs(ObjectProcessor<XTextContent> processor, ProgressInformer progress) throws Exception {
         XEnumerationAccess xEnumAccess = UnoRuntime
                 .queryInterface(XEnumerationAccess.class, xDoc.getText());
         XEnumeration xEnum = xEnumAccess.createEnumeration();
