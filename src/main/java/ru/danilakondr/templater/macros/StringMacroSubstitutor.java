@@ -14,9 +14,13 @@ import org.apache.commons.text.lookup.StringLookup;
  * @since 0.3.0
  */
 public class StringMacroSubstitutor implements MacroSubstitutor.Substitutor {
+    private final StringLookup lookup;
+
+    public StringMacroSubstitutor(StringLookup lookup) {
+        this.lookup = lookup;
+    }
     @Override
-    public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
-        StringLookup lookup = (StringLookup)parameter;
+    public void substitute(XTextDocument xDoc, XTextRange xRange) {
         StringSubstitutor substitutor = new StringSubstitutor(lookup, "%", "%", '%');
 
         String value = substitutor.replace(xRange.getString());

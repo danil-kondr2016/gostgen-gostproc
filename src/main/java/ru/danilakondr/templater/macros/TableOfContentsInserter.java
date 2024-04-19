@@ -6,8 +6,6 @@ import com.sun.star.text.*;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
-import java.util.regex.Pattern;
-
 /**
  * Обработчик, вставляющий оглавление в документ на месте <code>%TOC%</code>.
  *
@@ -49,10 +47,10 @@ public class TableOfContentsInserter implements MacroSubstitutor.Substitutor {
     }
 
     @Override
-    public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
+    public void substitute(XTextDocument xDoc, XTextRange xRange) {
         System.out.println("Inserting Table of Contents...");
 
-        XText xText = xDoc.getText();
+        XText xText = xRange.getText();
         XTextCursor xCursor = xText.createTextCursorByRange(xRange);
 
         xCursor.gotoRange(xRange, true);

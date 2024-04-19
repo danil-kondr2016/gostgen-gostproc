@@ -50,7 +50,7 @@ public class NumberingStyleProcessor implements TextDocument.ObjectProcessor<XTe
         }
     }
 
-    private void processSingleLevel(int i, PropertyValue[] levelProps) {
+    private void processSingleLevel(int levelIndex, PropertyValue[] levelProps) {
         boolean isBullet = false;
 
         for (int j = 0; j < levelProps.length; j++) {
@@ -59,7 +59,7 @@ public class NumberingStyleProcessor implements TextDocument.ObjectProcessor<XTe
                     isBullet = true;
 
             if (levelProps[j].Name.compareTo("ParentNumbering") == 0)
-                levelProps[j].Value = (short)(i+1);
+                levelProps[j].Value = (short)(levelIndex+1);
             if (levelProps[j].Name.compareTo("IndentAt") == 0)
                 levelProps[j].Value = 0;
             if (levelProps[j].Name.compareTo("FirstLineIndent") == 0)
@@ -76,14 +76,14 @@ public class NumberingStyleProcessor implements TextDocument.ObjectProcessor<XTe
             if (!isBullet && levelProps[j].Name.compareTo("Suffix") == 0)
                 levelProps[j].Value = ")";
             if (!isBullet && levelProps[j].Name.compareTo("ListFormat") == 0)
-                levelProps[j].Value = listFormat(i);
+                levelProps[j].Value = listFormat(levelIndex);
 
             if (isBullet && levelProps[j].Name.compareTo("BulletChar") == 0)
                 levelProps[j].Value = "\u2014";
         }
     }
 
-    private String listFormat(int i) {
-        return String.format("%%%d%%)", i+1);
+    private String listFormat(int levelIndex) {
+        return String.format("%%%d%%)", levelIndex+1);
     }
 }

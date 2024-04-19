@@ -2,8 +2,6 @@ package ru.danilakondr.templater;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.XNamed;
-import com.sun.star.scanner.XScannerManager;
 import com.sun.star.text.*;
 import com.sun.star.frame.*;
 import com.sun.star.uno.*;
@@ -18,7 +16,6 @@ import java.lang.RuntimeException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Scanner;
 
 import com.sun.star.util.XCloseable;
@@ -26,8 +23,6 @@ import org.kohsuke.args4j.*;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 import ru.danilakondr.templater.macros.*;
 import ru.danilakondr.templater.processing.*;
-
-import javax.swing.*;
 
 /**
  * Главный класс постобработчика документов с использованием LibreOffice.
@@ -177,11 +172,11 @@ public class Application {
 		this.loadTemplate();
 
 		MacroSubstitutor substitutor = new MacroSubstitutor(xDoc);
-		substitutor.substitute(new MainTextIncludeSubstitutor(), mainTextURL);
+		substitutor.substitute(new MainTextIncludeSubstitutor(mainTextURL));
 		for (int i = 0; i < 16; i++)
-			substitutor.substitute(new DocumentIncludeSubstitutor(), null);
-		substitutor.substitute(new StringMacroSubstitutor(), stringMacros);
-		substitutor.substitute(new TableOfContentsInserter(), null);
+			substitutor.substitute(new DocumentIncludeSubstitutor());
+		substitutor.substitute(new StringMacroSubstitutor(stringMacros));
+		substitutor.substitute(new TableOfContentsInserter());
 
 		TextDocument document = new TextDocument(xDoc);
 		document.processFormulas(new MathFormulaFixProcessor(), new DefaultProgressInformer("Fixing formulas"));
@@ -193,7 +188,7 @@ public class Application {
 		document.updateAllIndexes();
 
 		System.out.println("Applying counters...");
-		substitutor.substitute(new StringMacroSubstitutor(), DocumentCounter.getCounter(xDoc));
+		substitutor.substitute(new StringMacroSubstitutor(DocumentCounter.getCounter(xDoc)));
 
 		this.success = true;
 	}

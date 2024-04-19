@@ -7,8 +7,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
 
-import java.util.regex.Pattern;
-
 /**
  * Обработчик макроса %MAIN_TEXT%. Вставляет основной текст на нужном месте.
  *
@@ -16,17 +14,21 @@ import java.util.regex.Pattern;
  * @since 0.3.0
  */
 public class MainTextIncludeSubstitutor implements MacroSubstitutor.Substitutor {
+    private final String mainTextURL;
+
+    public MainTextIncludeSubstitutor(String mainTextURL) {
+        this.mainTextURL = mainTextURL;
+    }
     @Override
-    public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
-        String include = (String)parameter;
+    public void substitute(XTextDocument xDoc, XTextRange xRange) {
         try {
-            System.out.printf("Including %s\n", include);
+            System.out.printf("Including %s\n", mainTextURL);
 
             XTextCursor xCursor = xDoc.getText().createTextCursorByRange(xRange);
             xCursor.gotoRange(xRange, true);
 
             XDocumentInsertable xInsertable = UnoRuntime.queryInterface(XDocumentInsertable.class, xCursor);
-            xInsertable.insertDocumentFromURL(include, new PropertyValue[0]);
+            xInsertable.insertDocumentFromURL(mainTextURL, new PropertyValue[0]);
         }
         catch (Exception e) {
             throw new RuntimeException(e);

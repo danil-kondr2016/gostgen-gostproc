@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 public class DocumentIncludeSubstitutor implements MacroSubstitutor.Substitutor {
     private static final Pattern macroPattern = Pattern.compile("%INCLUDE\\((.*)\\)%");
     @Override
-    public void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter) {
+    public void substitute(XTextDocument xDoc, XTextRange xRange) {
         String include = macroPattern.matcher(xRange.getString()).replaceAll("$1");
 
         File f = new File(include).getAbsoluteFile();
@@ -34,7 +34,7 @@ public class DocumentIncludeSubstitutor implements MacroSubstitutor.Substitutor 
         try {
             System.out.printf("Including %s\n", url);
 
-            XTextCursor xCursor = xDoc.getText().createTextCursorByRange(xRange);
+            XTextCursor xCursor = xRange.getText().createTextCursorByRange(xRange);
             xCursor.gotoRange(xRange, true);
 
             XDocumentInsertable xInsertable = UnoRuntime.queryInterface(XDocumentInsertable.class, xCursor);

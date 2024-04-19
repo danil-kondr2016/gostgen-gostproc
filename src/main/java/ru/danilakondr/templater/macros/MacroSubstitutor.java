@@ -28,7 +28,7 @@ public class MacroSubstitutor {
      */
     @FunctionalInterface
     public interface Substitutor {
-        void substitute(XTextDocument xDoc, XTextRange xRange, Object parameter);
+        void substitute(XTextDocument xDoc, XTextRange xRange);
 
         default boolean test(XTextRange xRange) {
             return xRange.getString().matches("%(.*?)%");
@@ -39,9 +39,8 @@ public class MacroSubstitutor {
      * Ищет и обрабатывает макросы в документе.
      *
      * @param proc обработчик макросов
-     * @param parameter параметр
      */
-    public void substitute(Substitutor proc, Object parameter) throws Exception {
+    public void substitute(Substitutor proc) throws Exception {
         XSearchable xS = UnoRuntime.queryInterface(XSearchable.class, xDoc);
         XSearchDescriptor xSD = xS.createSearchDescriptor();
 
@@ -53,7 +52,7 @@ public class MacroSubstitutor {
             Object oFound = xAllFound.getByIndex(i);
             XTextRange xFound = UnoRuntime.queryInterface(XTextRange.class, oFound);
             if (proc.test(xFound)) {
-                proc.substitute(xDoc, xFound, parameter);
+                proc.substitute(xDoc, xFound);
             }
         }
     }
