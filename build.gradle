@@ -27,7 +27,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'ru.danilakondr.templater.Application'
+    mainClass = 'ru.danilakondr.templater.app.Main'
 }
 
 run {
