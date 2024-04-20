@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 /**
  * Класс-обёртка над XTextDocument. Содержит методы для работы с объектами,
@@ -213,7 +212,8 @@ public class TextDocument {
     /**
      * Обновляет все индексы в документе.
      */
-    public void updateAllIndexes() {
+    public void updateAllIndexes(ProgressInformer informer) {
+        informer.inform(-1, -1);
         XDocumentIndexesSupplier xSup = UnoRuntime
                 .queryInterface(XDocumentIndexesSupplier.class, xDoc);
         XIndexAccess xIndexes = xSup.getDocumentIndexes();
@@ -229,5 +229,9 @@ public class TextDocument {
         catch (java.lang.Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void updateAllIndexes() {
+        updateAllIndexes((a, b) -> {});
     }
 }
