@@ -98,6 +98,7 @@ public class Main {
             catch (FileNotFoundException e) {
                 System.err.printf("%s: file not found, skipping%n", e.getMessage());
             }
+            catch (NullPointerException ignored) {}
 
             templater.loadMacrosFromMap(templaterArguments.macroOverrides);
             templater.setMainTextPath(templaterArguments.mainTextPath);
