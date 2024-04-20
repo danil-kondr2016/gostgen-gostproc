@@ -20,7 +20,7 @@ UNO-Templater
 3. Разворачивание строковых макросов
 4. Исправление формул StarMath
 5. Оформление всех таблиц (за исключением тех, что находятся в секциях,
-начинающихся на `eq:`)
+начинающихся на `eq:` и `unproc-tbl:`)
 6. Выравнивание формул и изображений по центру
 7. Установка привязки формул и изображений как символов
 8. Оформление списков в соответствии с ГОСТ 7.32-2017
@@ -35,13 +35,14 @@ UNO-Templater - консольное приложение на Java. Для ег
 
 Ключи программы UNO-Templater:
 
-    templater  [-D] [-M (--macros) MACRO_FILE] [-e (--embed-fonts)] [-f (--force, --overwrite)] [-h (--help, -?)] [-m (--main-text) MAINFILE] [-o (--output) OUTFILE] [-t (--template) TEMPLATE]
+    templater  [-D] [-M (--macros) MACRO_FILE] [-e (--embed-fonts)] [-f (--force, --overwrite)] [-h (--help, -?)] [-m (--main-text) MAINFILE] [-o (--output) OUTFILE] [-t (--template) TEMPLATE] [-P (--pdf, --make-pdf)]
 
     -e (--embed-fonts)        : встроить шрифты
     -f (--force, --overwrite) : перезаписать выходной файл
     -m (--main-text) MAINFILE : файл с основным текстом
     -o (--output) OUTFILE     : выходной файл
     -t (--template) TEMPLATE  : файл шаблона
+    -P (--pdf, --make-pdf)    : сгенерировать PDF
     -D (key=value)            : строковый макрос
     -M (--macros) MACRO_FILE  : задать файл с макросами
 
