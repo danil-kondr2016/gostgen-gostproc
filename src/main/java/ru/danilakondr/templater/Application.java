@@ -17,6 +17,8 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sun.star.util.XCloseable;
 import org.kohsuke.args4j.*;
@@ -47,12 +49,15 @@ public class Application {
 	private boolean embedFonts;
 
 	@Option(name="-f", aliases={"--force", "--overwrite"}, usage="Overwrite output file")
-	private boolean overwrite;
+	private boolean shouldOverwrite;
+
+	@Option(name="-P", aliases={"--pdf", "--make-pdf"}, usage="Generate PDF file")
+	private boolean shouldGeneratePDF;
 
 	@Option(name="-D", usage="Specify macro", handler=MapOptionHandler.class)
 	private HashMap<String, String> macroOverrides;
 
-	@Option(name="-h", aliases=	{"--help", "-?"})
+	@Option(name="-h", aliases={"--help", "-?"}, help=true)
 	private boolean shouldShowHelp;
 
 	private final StringMacros stringMacros;
@@ -219,7 +224,7 @@ public class Application {
 		if (templateURL.equals(mainTextURL))
 			throw new IllegalArgumentException("Template and main text file cannot have equal names");
 
-        if (Path.of(new URI(outputURL)).toFile().exists() && !overwrite) {
+        if (Path.of(new URI(outputURL)).toFile().exists() && !shouldOverwrite) {
 			askForOverwrite(outputPath);
 		}
 	}
@@ -233,10 +238,10 @@ public class Application {
 
 				if (choice.equalsIgnoreCase("y")) {
 					selected = true;
-					overwrite = true;
+					shouldOverwrite = true;
 				} else if (choice.equalsIgnoreCase("n")) {
 					selected = true;
-					overwrite = false;
+					shouldOverwrite = false;
 				} else {
 					throw new IllegalArgumentException("Invalid choice: " + choice);
 				}
@@ -249,7 +254,7 @@ public class Application {
 		catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
-		if (!overwrite) {
+		if (!shouldOverwrite) {
 			throw new RuntimeException("Could not overwrite existing file");
 		}
 	}
@@ -302,7 +307,7 @@ public class Application {
 		if (read && !f.exists())
 			return null;
 
-		return f.toPath().toUri().toString();
+		return f.toPath().toUri().toString().strip();
 	}
 
 	/**
@@ -368,6 +373,44 @@ public class Application {
 	}
 
 	/**
+	 * Экспортирует готовый файл в PDF при условии, если имеется соответствующий
+	 * аргумент.
+	 * <p>
+	 * В названии файла расширение заменяется на PDF.
+	 *
+	 * @since 0.4.2
+	 */
+	private void generatePDF() throws Exception {
+		if (!shouldGeneratePDF)
+			return;
+
+		String pdfPath = outputPath;
+
+		Pattern ext = Pattern.compile("(.*)\\.(.*?)$");
+		Matcher m = ext.matcher(pdfPath);
+
+		if (m.matches())
+			pdfPath = m.replaceAll("$1.pdf");
+		else
+			pdfPath += ".pdf";
+
+		String pdfURL = getURI(pdfPath, false);
+		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
+
+		PropertyValue[] propertyValues = new PropertyValue[2];
+
+		propertyValues[0] = new PropertyValue();
+		propertyValues[0].Name = "Overwrite";
+		propertyValues[0].Value = Boolean.TRUE;
+
+		propertyValues[1] = new PropertyValue();
+		propertyValues[1].Name = "FilterName";
+		propertyValues[1].Value = "writer_pdf_Export";
+
+		xStorable.storeToURL(pdfURL, propertyValues);
+	}
+
+	/**
 	 * Закрывает документ.
 	 *
 	 * @since 0.3.3
@@ -387,6 +430,7 @@ public class Application {
 		if (this.success) {
 			try {
 				this.saveDocument();
+				this.generatePDF();
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
