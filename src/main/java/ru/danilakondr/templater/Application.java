@@ -167,7 +167,7 @@ public class Application {
 
 		stringMacros.loadFromMap(macroOverrides);
 
-		fixFormulasAlignmentInMainFile(mainTextURL);
+		fixObjectAlignmentInMainFile(mainTextURL);
 
 		this.loadTemplate();
 
@@ -180,10 +180,10 @@ public class Application {
 
 		TextDocument document = new TextDocument(xDoc);
 		document.processFormulas(new MathFormulaFixProcessor(), new DefaultProgressInformer("Fixing formulas"));
-		document.processFormulas(new ObjectAligner(), new DefaultProgressInformer("Aligning formulas properly"));
+		document.processFormulas(new SingleObjectAligner(), new DefaultProgressInformer("Aligning formulas properly"));
 		document.processParagraphs(new NumberingStyleProcessor(), new DefaultProgressInformer("Processing numbering style of paragraphs"));
-		document.processImages(new ImageWidthFixProcessor(), new DefaultProgressInformer("Fixing image widths"));
-		document.processImages(new ObjectAligner(), new DefaultProgressInformer("Fixing image alignments"));
+		document.processImages(new ImageSizeFixProcessor(), new DefaultProgressInformer("Fixing image widths"));
+		document.processImages(new SingleObjectAligner(), new DefaultProgressInformer("Fixing image alignments"));
 		document.processTables(new TableStyleSetter(), new DefaultProgressInformer("Setting table styles"));
 		document.updateAllIndexes();
 
@@ -255,12 +255,12 @@ public class Application {
 	}
 
 	/**
-	 * Исправляет выравнивание формул в главном файле.
+	 * Исправляет выравнивание формул и изображений в главном файле.
 	 *
 	 * @param mainTextURL URL-адрес файла
 	 * @since 0.3.2
 	 */
-	private void fixFormulasAlignmentInMainFile(String mainTextURL) throws Exception {
+	private void fixObjectAlignmentInMainFile(String mainTextURL) throws Exception {
 		XTextDocument xMainDoc = this.loadFile(mainTextURL);
 		XCloseable xMainDocCloseable = UnoRuntime.queryInterface(XCloseable.class, xMainDoc);
 		XStorable xMainDocStorable = UnoRuntime.queryInterface(XStorable.class, xMainDoc);
@@ -272,7 +272,14 @@ public class Application {
 				xContentProps.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
 			}
 			catch (Exception ignored) {}
-		}, new DefaultProgressInformer("Processing formula in main file"));
+		}, new DefaultProgressInformer("Processing formulas in main file"));
+		mainDoc.processImages((o, d) -> {
+			XPropertySet xContentProps = UnoRuntime.queryInterface(XPropertySet.class, o);
+			try {
+				xContentProps.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
+			}
+			catch (Exception ignored) {}
+		}, new DefaultProgressInformer("Processing images in main file"));
 
 		xMainDocStorable.store();
 		xMainDocCloseable.close(true);

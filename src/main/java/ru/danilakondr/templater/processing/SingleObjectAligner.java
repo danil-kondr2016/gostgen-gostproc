@@ -11,7 +11,7 @@ import com.sun.star.uno.UnoRuntime;
  * @author Данила А. Кондратенко
  * @since 0.3.2
  */
-public class ObjectAligner implements TextDocument.ObjectProcessor<Object> {
+public class SingleObjectAligner implements TextDocument.ObjectProcessor<Object> {
     @Override
     public void process(Object object, XTextDocument xDoc) {
         try {
