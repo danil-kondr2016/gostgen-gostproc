@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class Main {
-    static class TemplaterArguments {
+    private static class TemplaterArguments {
         @Option(name = "-t", aliases = {"--template"}, usage = "Template file")
         public String templatePath;
 
