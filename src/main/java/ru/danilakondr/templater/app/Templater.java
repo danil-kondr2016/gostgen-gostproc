@@ -1,4 +1,4 @@
-package ru.danilakondr.templater;
+package ru.danilakondr.templater.app;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
@@ -14,64 +14,51 @@ import java.lang.Exception;
 import java.lang.IllegalArgumentException;
 import java.lang.RuntimeException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sun.star.util.XCloseable;
-import org.kohsuke.args4j.*;
-import org.kohsuke.args4j.spi.MapOptionHandler;
 import ru.danilakondr.templater.macros.*;
 import ru.danilakondr.templater.processing.*;
+import ru.danilakondr.templater.progress.DefaultProgressInformer;
 
 /**
  * Главный класс постобработчика документов с использованием LibreOffice.
  *
  * @author Данила А. Кондратенко
- * @since 0.1.0
+ * @since 0.5.0, 0.1.0
  */
-public class Application {
-	@Option(name="-t", aliases={"--template"}, usage="Template file")
+public class Templater {
 	private String templatePath;
-
-	@Option(name="-m", aliases={"--main-text"}, usage="Main text file")
 	private String mainTextPath;
-
-	@Option(name="-o", aliases={"--output"}, usage="Output file")
 	private String outputPath;
 
-	@Option(name="-M", aliases={"--macros"}, usage="Macros file")
-	private String macroFile;
+	private transient String templateURL;
+	private transient String mainTextURL;
+	private transient String outputURL;
 
-	@Option(name="-e", aliases={"--embed-fonts"}, usage="Embed fonts")
-	private boolean embedFonts;
-
-	@Option(name="-f", aliases={"--force", "--overwrite"}, usage="Overwrite output file")
+	private boolean shouldEmbedFonts;
 	private boolean shouldOverwrite;
-
-	@Option(name="-P", aliases={"--pdf", "--make-pdf"}, usage="Generate PDF file")
-	private boolean shouldGeneratePDF;
-
-	@Option(name="-D", usage="Specify macro", handler=MapOptionHandler.class)
-	private HashMap<String, String> macroOverrides;
-
-	@Option(name="-h", aliases={"--help", "-?"}, help=true)
-	private boolean shouldShowHelp;
+	private boolean verbose;
 
 	private final StringMacros stringMacros;
+
     private XDesktop xDesktop;
 	private XTextDocument xDoc;
 	private XComponentContext xContext;
 	private XMultiComponentFactory xMCF;
-	private boolean success = false;
 
-	public Application() {
+	private final DefaultProgressInformer informer;
+
+	public Templater() {
 		this.xContext = null;
 		this.xMCF = null;
-		this.macroFile = null;
 		this.stringMacros = new StringMacros();
+		this.informer = new DefaultProgressInformer("Doing");
 	}
 
 	public void setContext(XComponentContext xContext) {
@@ -79,126 +66,110 @@ public class Application {
 		this.xMCF = this.xContext.getServiceManager();
 	}
 
-	public static void main(String[] args) {
-		Application app = new Application();
-		CmdLineParser parser = new CmdLineParser(app);
-		try {
-			parser.parseArgument(args);
-		}
-		catch (CmdLineException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		}
-
-		if (app.shouldShowHelp) {
-			System.out.println("Usage:");
-			System.out.print("templater ");
-			parser.printSingleLineUsage(System.out);
-			System.out.println();
-			System.out.println();
-			parser.printUsage(System.out);
-			System.exit(0);
-		}
-
-		XComponentContext xContext = null;
-		try {
-			xContext = LibreOffice.bootstrap();
-			app.setContext(xContext);
-		}
-		catch (LibreOfficeException e) {
-			System.err.println(e.getMessage());
-		}
-		catch (IllegalArgumentException e) {
-			System.err.println("Invalid argument: " + e.getMessage());
-		}
-		catch (FileNotFoundException e) {
-			System.err.printf("%s: file not found%n", e.getMessage());
-		}
-		catch (IOException e) {
-			System.err.printf("%s%n", e);
-		}
-		catch (Exception e) {
-			e.printStackTrace(System.err);
-			System.exit(-1);
-		}
-
-		int status = 0;
-		try {
-			app.run();
-		}
-		catch (IllegalArgumentException e) {
-			System.err.println("Invalid argument: " + e.getMessage());
-		}
-		catch (RuntimeException e) {
-			System.err.printf("%s%n", e.getMessage());
-			e.printStackTrace(System.err);
-		}
-		catch (FileNotFoundException e) {
-			System.err.printf("%s: file not found%n", e.getMessage());
-		}
-		catch (Exception e) {
-			e.printStackTrace(System.err);
-			status = 1;
-		}
-		finally {
-			app.terminate();
-			System.exit(status);
-		}
+	public void setOutputPath(String outputPath) {
+		this.outputPath = outputPath;
+		this.outputURL = getURI(outputPath);
 	}
 
-	/**
-	 * Запуск приложения.
-	 *
-	 * @since 0.1.0
-	 */
-	public void run() throws Exception {
-		this.checkPaths();
+	public void setTemplatePath(String templatePath) {
+		this.templatePath = templatePath;
+		this.templateURL = getURI(templatePath);
+	}
+
+	public void setMainTextPath(String mainTextPath) {
+		this.mainTextPath = mainTextPath;
+		this.mainTextURL = getURI(mainTextPath);
+	}
+
+	public void setShouldOverwrite(boolean shouldOverwrite) {
+		this.shouldOverwrite = shouldOverwrite;
+	}
+
+	public void setShouldEmbedFonts(boolean shouldEmbedFonts) {
+		this.shouldEmbedFonts = shouldEmbedFonts;
+	}
+
+	public void loadMacrosFromFile(String path) throws IOException {
+		stringMacros.loadFromFile(path);
+	}
+
+	public void loadMacrosFromMap(Map<String, String> macros) {
+		stringMacros.loadFromMap(macros);
+	}
+
+	public void setVerbose(boolean verbose) {
+		this.verbose = verbose;
+		this.informer.setSilent(!verbose);
+	}
+
+	public void processDocument() throws Exception {
+		this.checkFiles();
 		this.createDesktop();
 
-		String mainTextURL = getURI(mainTextPath, true);
-		if (mainTextURL == null) {
-			throw new FileNotFoundException(mainTextPath);
-		}
-
-		if (macroFile != null) {
-			if (new File(macroFile).exists()) {
-				System.err.println("Loading macros from file...");
-				stringMacros.loadFromFile(macroFile);
-			}
-			else {
-				System.err.printf("File %s not found, skipping\n", macroFile);
-			}
-		}
-
-		stringMacros.loadFromMap(macroOverrides);
-
-		fixObjectAlignmentInMainFile(mainTextURL);
-
+		fixObjectAlignmentInFile(mainTextURL);
 		this.loadTemplate();
+
+		this.substituteMacros();
+		this.fixDocument();
+		this.applyCounters();
+	}
+
+	private void substituteMacros() throws Exception {
+		informer.setProgressString("Substituting macros");
+		informer.inform(-1, -1);
 
 		MacroSubstitutor substitutor = new MacroSubstitutor(xDoc);
 		substitutor.substitute(new MainTextIncludeSubstitutor(mainTextURL));
-		for (int i = 0; i < 16; i++)
-			substitutor.substitute(new DocumentIncludeSubstitutor());
+		substitutor.substitute(new DocumentIncludeSubstitutor());
 		substitutor.substitute(new StringMacroSubstitutor(stringMacros));
 		substitutor.substitute(new TableOfContentsInserter());
-
-		TextDocument document = new TextDocument(xDoc);
-		document.processFormulas(new MathFormulaFixProcessor(), new DefaultProgressInformer("Fixing formulas"));
-		document.processFormulas(new SingleObjectAligner(), new DefaultProgressInformer("Aligning formulas properly"));
-		document.processParagraphs(new NumberingStyleProcessor(), new DefaultProgressInformer("Processing numbering style of paragraphs"));
-		document.processImages(new ImageSizeFixProcessor(), new DefaultProgressInformer("Fixing image widths"));
-		document.processImages(new SingleObjectAligner(), new DefaultProgressInformer("Fixing image alignments"));
-		document.processTables(new TableStyleSetter(), new DefaultProgressInformer("Setting table styles"));
-		document.updateAllIndexes();
-
-		System.out.println("Applying counters...");
-		substitutor.substitute(new StringMacroSubstitutor(DocumentCounter.getCounter(xDoc)));
-
-		this.success = true;
 	}
 
-	private void checkPaths() throws Exception {
+	private void fixDocument() throws Exception {
+		TextDocument document = new TextDocument(xDoc);
+
+		informer.setProgressString("Fixing formulas");
+		document.processFormulas(new MathFormulaFixProcessor(), informer);
+
+		informer.setProgressString("Aligning formulas properly");
+		document.processFormulas(new SingleObjectAligner(), informer);
+
+		informer.setProgressString("Processing numbering style of paragraphs");
+		document.processParagraphs(new NumberingStyleProcessor(), informer);
+
+		informer.setProgressString("Fixing image widths");
+		document.processImages(new ImageSizeFixProcessor(), informer);
+
+		informer.setProgressString("Fixing image alignments");
+		document.processImages(new SingleObjectAligner(), informer);
+
+		informer.setProgressString("Setting table styles");
+		document.processTables(new TableStyleSetter(), informer);
+
+		informer.setProgressString("Updating styles");
+		document.updateAllIndexes(informer);
+	}
+
+	private void applyCounters() throws Exception {
+		informer.setProgressString("Applying counters");
+		informer.inform(-1, -1);
+
+		new MacroSubstitutor(xDoc)
+				.substitute(new StringMacroSubstitutor(
+						DocumentCounter.getCounter(xDoc)));
+	}
+
+	private boolean isFileNotExists(String url) {
+		try {
+			File f = Path.of(new URI(url)).toFile();
+			return !f.exists();
+		}
+		catch (URISyntaxException e) {
+			return true;
+		}
+	}
+
+	private void checkFiles() throws Exception {
 		if (templatePath == null)
 			throw new IllegalArgumentException("Template file has not been specified");
 		if (mainTextPath == null)
@@ -206,23 +177,17 @@ public class Application {
 		if (outputPath == null)
 			throw new IllegalArgumentException("Output file has not been specified");
 
-		String mainTextURL = getURI(mainTextPath, true);
-		String templateURL = getURI(templatePath, true);
-
-		if (templateURL == null)
+		if (isFileNotExists(templateURL))
 			throw new FileNotFoundException(templatePath);
-		if (mainTextURL == null)
+		if (isFileNotExists(mainTextURL))
 			throw new FileNotFoundException(mainTextPath);
 
-		String outputURL = getURI(outputPath, false);
-		assert outputURL != null;
-
 		if (mainTextURL.equals(outputURL))
-			throw new IllegalArgumentException("Main text file and output file cannot have equal names");
+			throw new IllegalArgumentException("Main text file and output file cannot be the same file");
 		if (templateURL.equals(outputURL))
-			throw new IllegalArgumentException("Template and output file cannot have equal names");
+			throw new IllegalArgumentException("Template and output file cannot be the same file");
 		if (templateURL.equals(mainTextURL))
-			throw new IllegalArgumentException("Template and main text file cannot have equal names");
+			throw new IllegalArgumentException("Template and main text file cannot be the same file");
 
         if (Path.of(new URI(outputURL)).toFile().exists() && !shouldOverwrite) {
 			askForOverwrite(outputPath);
@@ -243,17 +208,15 @@ public class Application {
 					selected = true;
 					shouldOverwrite = false;
 				} else {
-					throw new IllegalArgumentException("Invalid choice: " + choice);
+					System.out.println("Invalid choice: " + choice);
 				}
 			}
 			System.out.println();
 		}
-		catch (IllegalArgumentException e) {
-			throw e;
-		}
 		catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
+
 		if (!shouldOverwrite) {
 			throw new RuntimeException("Could not overwrite existing file");
 		}
@@ -265,7 +228,7 @@ public class Application {
 	 * @param mainTextURL URL-адрес файла
 	 * @since 0.3.2
 	 */
-	private void fixObjectAlignmentInMainFile(String mainTextURL) throws Exception {
+	private void fixObjectAlignmentInFile(String mainTextURL) throws Exception {
 		XTextDocument xMainDoc = this.loadFile(mainTextURL);
 		XCloseable xMainDocCloseable = UnoRuntime.queryInterface(XCloseable.class, xMainDoc);
 		XStorable xMainDocStorable = UnoRuntime.queryInterface(XStorable.class, xMainDoc);
@@ -301,13 +264,12 @@ public class Application {
 		xDesktop = UnoRuntime.queryInterface(XDesktop.class, oDesktop);
 	}
 
-	private String getURI(String path, boolean read) {
-		File f = new File(path).getAbsoluteFile();
-
-		if (read && !f.exists())
+	private String getURI(String path) {
+		if (path == null)
 			return null;
 
-		return f.toPath().toUri().toString().strip();
+		File f = new File(path).getAbsoluteFile();
+		return f.toPath().toUri().toString();
 	}
 
 	/**
@@ -328,13 +290,22 @@ public class Application {
 
 		XComponent xComp = xCompLoader.loadComponentFromURL(url, "_blank", 0, props);
 		XServiceInfo xServiceInfo = UnoRuntime.queryInterface(XServiceInfo.class, xComp);
-		if (!xServiceInfo.supportsService("com.sun.star.text.TextDocument")) {
-			xComp.dispose();
-			throw new IllegalArgumentException("Invalid format");
-		}
-		XTextDocument doc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
+		if (xServiceInfo == null)
+			throw new IllegalArgumentException("Failed to create XComponent");
 
-		return doc;
+		if (!xServiceInfo.supportsService("com.sun.star.text.TextDocument")) {
+			XCloseable xCloseable = UnoRuntime.queryInterface(
+					XCloseable.class, xComp
+			);
+			if (xCloseable == null)
+				xComp.dispose();
+			else
+				xCloseable.close(false);
+
+			throw new IllegalArgumentException("Invalid format of document");
+		}
+
+        return UnoRuntime.queryInterface(XTextDocument.class, xComp);
 	}
 
 	/**
@@ -343,10 +314,6 @@ public class Application {
 	 * @since 0.1.0
 	 */
 	private void loadTemplate() throws Exception {
-		String templateURL = getURI(templatePath, true);
-		if (templateURL == null)
-			throw new FileNotFoundException(templatePath);
-
 		this.xDoc = loadFile(templateURL);
 	}
 
@@ -355,11 +322,13 @@ public class Application {
 	 *
 	 * @since 0.1.0
 	 */
-	private void saveDocument() throws Exception {
-		String outputURL = getURI(outputPath, false);
+	public void saveDocument() throws Exception {
+		informer.setProgressString("Saving document");
+		informer.inform(-1, -1);
+
 		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
 
-		if (embedFonts) {
+		if (shouldEmbedFonts) {
 			XMultiServiceFactory xMSF = UnoRuntime
 					.queryInterface(XMultiServiceFactory.class, xDoc);
 			XPropertySet xDocSettings = UnoRuntime.queryInterface(
@@ -380,21 +349,20 @@ public class Application {
 	 *
 	 * @since 0.4.2
 	 */
-	private void generatePDF() throws Exception {
-		if (!shouldGeneratePDF)
-			return;
+	public void generatePDF() throws Exception {
+		informer.setProgressString("Generating PDF file...");
+		informer.inform(-1, -1);
 
-		String pdfPath = outputPath;
+		String pdfURL = outputURL;
 
 		Pattern ext = Pattern.compile("(.*)\\.(.*?)$");
-		Matcher m = ext.matcher(pdfPath);
+		Matcher m = ext.matcher(pdfURL);
 
 		if (m.matches())
-			pdfPath = m.replaceAll("$1.pdf");
+			pdfURL = m.replaceAll("$1.pdf");
 		else
-			pdfPath += ".pdf";
+			pdfURL += ".pdf";
 
-		String pdfURL = getURI(pdfPath, false);
 		XStorable xStorable = UnoRuntime.queryInterface(XStorable.class, xDoc);
 
 		PropertyValue[] propertyValues = new PropertyValue[2];
@@ -415,33 +383,12 @@ public class Application {
 	 *
 	 * @since 0.3.3
 	 */
-	private void closeDocument() throws Exception {
+	public void closeDocument() throws Exception {
+		if (xDoc == null)
+			return;
+
 		XCloseable xCloseable = UnoRuntime
 				.queryInterface(XCloseable.class, xDoc);
 		xCloseable.close(true);
-	}
-
-	/**
-	 * Завершает приложение.
-	 *
-	 * @since 0.1.0
-	 */
-	public void terminate() {
-		if (this.success) {
-			try {
-				this.saveDocument();
-				this.generatePDF();
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-			}
-		}
-
-		try {
-			if (xDoc != null)
-				this.closeDocument();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 }
