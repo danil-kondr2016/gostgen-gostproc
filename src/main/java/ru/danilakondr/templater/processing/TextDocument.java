@@ -1,16 +1,14 @@
 package ru.danilakondr.templater.processing;
 
-import com.sun.star.beans.Property;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.*;
 import com.sun.star.document.XEmbeddedObjectSupplier2;
 import com.sun.star.embed.EmbedUpdateModes;
 import com.sun.star.embed.XEmbeddedObject;
 import com.sun.star.text.*;
-import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
-import org.w3c.dom.ls.LSProgressEvent;
+import ru.danilakondr.templater.progress.ProgressInformer;
 
 import java.util.HashMap;
 import java.util.HashSet;

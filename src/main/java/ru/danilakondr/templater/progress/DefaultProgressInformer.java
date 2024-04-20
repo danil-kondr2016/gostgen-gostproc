@@ -1,4 +1,4 @@
-package ru.danilakondr.templater.processing;
+package ru.danilakondr.templater.progress;
 
 public class DefaultProgressInformer implements ProgressInformer {
     private final String progressString;
