@@ -1,4 +1,4 @@
-package ru.danilakondr.templater;
+package ru.danilakondr.templater.app;
 
 /**
  * Исключение при нахождении LibreOffice.

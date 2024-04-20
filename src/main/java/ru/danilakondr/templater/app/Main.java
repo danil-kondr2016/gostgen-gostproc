@@ -5,8 +5,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.spi.MapOptionHandler;
-import ru.danilakondr.templater.LibreOffice;
-import ru.danilakondr.templater.LibreOfficeException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

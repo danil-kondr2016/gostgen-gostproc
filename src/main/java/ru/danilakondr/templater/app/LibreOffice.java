@@ -1,4 +1,4 @@
-package ru.danilakondr.templater;
+package ru.danilakondr.templater.app;
 
 import com.sun.star.uno.XComponentContext;
 import ooo.connector.BootstrapSocketConnector;
