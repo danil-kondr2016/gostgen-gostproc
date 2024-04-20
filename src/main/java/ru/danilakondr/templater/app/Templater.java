@@ -106,7 +106,7 @@ public class Templater {
 		this.checkFiles();
 		this.createDesktop();
 
-		fixObjectAlignmentInFile(mainTextURL);
+		fixObjectAnchorsInMainFile();
 		this.loadTemplate();
 
 		this.substituteMacros();
@@ -162,7 +162,7 @@ public class Templater {
 
 		new MacroSubstitutor(xDoc)
 				.substitute(new StringMacroSubstitutor(
-						DocumentCounter.getCounter(xDoc)));
+						new DocumentCounter(xDoc)));
 	}
 
 	private boolean isFileNotExists(String url) {
@@ -231,10 +231,9 @@ public class Templater {
 	/**
 	 * Исправляет выравнивание формул и изображений в главном файле.
 	 *
-	 * @param mainTextURL URL-адрес файла
 	 * @since 0.3.2
 	 */
-	private void fixObjectAlignmentInFile(String mainTextURL) throws Exception {
+	private void fixObjectAnchorsInMainFile() throws Exception {
 		XTextDocument xMainDoc = this.loadFile(mainTextURL);
 		XCloseable xMainDocCloseable = UnoRuntime.queryInterface(XCloseable.class, xMainDoc);
 		XStorable xMainDocStorable = UnoRuntime.queryInterface(XStorable.class, xMainDoc);
