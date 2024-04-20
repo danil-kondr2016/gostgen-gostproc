@@ -32,8 +32,6 @@ public class DocumentIncludeSubstitutor implements MacroSubstitutor.Substitutor 
 
         String url = f.toURI().toString();
         try {
-            System.out.printf("Including %s\n", url);
-
             XTextCursor xCursor = xRange.getText().createTextCursorByRange(xRange);
             xCursor.gotoRange(xRange, true);
 

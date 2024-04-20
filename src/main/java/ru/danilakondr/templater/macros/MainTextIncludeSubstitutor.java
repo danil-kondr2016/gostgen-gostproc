@@ -22,8 +22,6 @@ public class MainTextIncludeSubstitutor implements MacroSubstitutor.Substitutor 
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange) {
         try {
-            System.out.printf("Including %s\n", mainTextURL);
-
             XTextCursor xCursor = xDoc.getText().createTextCursorByRange(xRange);
             xCursor.gotoRange(xRange, true);
 
