@@ -12,16 +12,16 @@ import java.util.HashMap;
 
 public class Main {
     private static class TemplaterArguments {
-        @Option(name = "-t", aliases = {"--template"}, usage = "Template file")
+        @Option(name = "-t", aliases = {"--template"}, usage = "Template file", metaVar = "TEMPLATE")
         public String templatePath;
 
-        @Option(name = "-m", aliases = {"--main-text"}, usage = "Main text file")
+        @Option(name = "-m", aliases = {"--main-text"}, usage = "Main text file", metaVar = "MAINFILE")
         public String mainTextPath;
 
-        @Option(name = "-o", aliases = {"--output"}, usage = "Output file")
+        @Option(name = "-o", aliases = {"--output"}, usage = "Output file", metaVar = "OUTFILE")
         public String outputPath;
 
-        @Option(name = "-M", aliases = {"--macros"}, usage = "Macros file")
+        @Option(name = "-M", aliases = {"--macros"}, usage = "Macros file", metaVar = "MACRO_FILE")
         public String macroFile;
 
         @Option(name = "-e", aliases = {"--embed-fonts"}, usage = "Embed fonts")
