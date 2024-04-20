@@ -14,46 +14,20 @@ import com.sun.star.uno.UnoRuntime;
 import org.apache.commons.text.lookup.StringLookup;
 
 
-public class DocumentCounter {
+public class DocumentCounter implements StringLookup {
     private final XTextDocument xDoc;
 
-    private DocumentCounter(XTextDocument xDoc) {
+    private final int n_pages;
+
+    private final int n_figures;
+
+    private final int n_tables;
+
+    public DocumentCounter(XTextDocument xDoc) {
         this.xDoc = xDoc;
-    }
-
-    private static class Counter implements StringLookup {
-        private int n_pages = 0;
-        private int n_figures = 0;
-        private int n_tables = 0;
-
-        public Counter(int n_pages, int n_figures, int n_tables) {
-            this.n_figures = n_figures;
-            this.n_pages = n_pages;
-            this.n_tables = n_tables;
-        }
-
-        @Override
-        public String lookup(String s) {
-            if (s.compareTo("N_PAGES") == 0)
-                return String.valueOf(n_pages);
-            if (s.compareTo("N_FIGURES") == 0)
-                return String.valueOf(n_figures);
-            if (s.compareTo("N_TABLES") == 0)
-                return String.valueOf(n_tables);
-
-            return null;
-        }
-    }
-
-    public static StringLookup getCounter(XTextDocument xDoc) {
-        DocumentCounter cnt = new DocumentCounter(xDoc);
-        Counter x = new Counter(
-                cnt.getPageCount(),
-                cnt.getFigureCount(),
-                cnt.getTableCount()
-        );
-
-        return x;
+        this.n_figures = getFigureCount();
+        this.n_pages = getPageCount();
+        this.n_tables = getTableCount();
     }
 
     private int getPageCount() {
@@ -107,5 +81,17 @@ public class DocumentCounter {
         }
 
         return count;
+    }
+
+    @Override
+    public String lookup(String s) {
+        if (s.compareTo("N_PAGES") == 0)
+            return String.valueOf(n_pages);
+        if (s.compareTo("N_FIGURES") == 0)
+            return String.valueOf(n_figures);
+        if (s.compareTo("N_TABLES") == 0)
+            return String.valueOf(n_tables);
+
+        return null;
     }
 }
