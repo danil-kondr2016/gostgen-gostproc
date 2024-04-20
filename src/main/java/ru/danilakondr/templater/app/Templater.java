@@ -233,6 +233,7 @@ public class Templater {
 		XCloseable xMainDocCloseable = UnoRuntime.queryInterface(XCloseable.class, xMainDoc);
 		XStorable xMainDocStorable = UnoRuntime.queryInterface(XStorable.class, xMainDoc);
 
+		informer.setProgressString("Processing formulas in main file");
 		TextDocument mainDoc = new TextDocument(xMainDoc);
 		mainDoc.processFormulas((o, d) -> {
 			XPropertySet xContentProps = UnoRuntime.queryInterface(XPropertySet.class, o);
@@ -240,14 +241,16 @@ public class Templater {
 				xContentProps.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
 			}
 			catch (Exception ignored) {}
-		}, new DefaultProgressInformer("Processing formulas in main file"));
+		}, informer);
+
+		informer.setProgressString("Processing images in main file");
 		mainDoc.processImages((o, d) -> {
 			XPropertySet xContentProps = UnoRuntime.queryInterface(XPropertySet.class, o);
 			try {
 				xContentProps.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
 			}
 			catch (Exception ignored) {}
-		}, new DefaultProgressInformer("Processing images in main file"));
+		}, informer);
 
 		xMainDocStorable.store();
 		xMainDocCloseable.close(true);
@@ -350,7 +353,7 @@ public class Templater {
 	 * @since 0.4.2
 	 */
 	public void generatePDF() throws Exception {
-		informer.setProgressString("Generating PDF file...");
+		informer.setProgressString("Generating PDF file");
 		informer.inform(-1, -1);
 
 		String pdfURL = outputURL;
