@@ -48,8 +48,6 @@ public class TableOfContentsInserter implements MacroSubstitutor.Substitutor {
 
     @Override
     public void substitute(XTextDocument xDoc, XTextRange xRange) {
-        System.out.println("Inserting Table of Contents...");
-
         XText xText = xRange.getText();
         XTextCursor xCursor = xText.createTextCursorByRange(xRange);
 

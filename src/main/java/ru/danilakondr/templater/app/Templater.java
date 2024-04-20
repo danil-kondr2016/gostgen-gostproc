@@ -115,13 +115,19 @@ public class Templater {
 	}
 
 	private void substituteMacros() throws Exception {
-		informer.setProgressString("Substituting macros");
-		informer.inform(-1, -1);
-
 		MacroSubstitutor substitutor = new MacroSubstitutor(xDoc);
+
+		informer.setProgressString("Including documents");
+		informer.inform(-1, -1);
 		substitutor.substitute(new MainTextIncludeSubstitutor(mainTextURL));
 		substitutor.substitute(new DocumentIncludeSubstitutor());
+
+		informer.setProgressString("Substituting string macros");
+		informer.inform(-1, -1);
 		substitutor.substitute(new StringMacroSubstitutor(stringMacros));
+
+		informer.setProgressString("Inserting Table of Contents");
+		informer.inform(-1, -1);
 		substitutor.substitute(new TableOfContentsInserter());
 	}
 
@@ -146,7 +152,7 @@ public class Templater {
 		informer.setProgressString("Setting table styles");
 		document.processTables(new TableStyleSetter(), informer);
 
-		informer.setProgressString("Updating styles");
+		informer.setProgressString("Updating indexes");
 		document.updateAllIndexes(informer);
 	}
 
