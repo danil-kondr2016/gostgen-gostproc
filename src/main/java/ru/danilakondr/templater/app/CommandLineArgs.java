@@ -148,7 +148,7 @@ public class CommandLineArgs {
                     .build();
 
             OPTION_GENERATE_PDF = Option.builder("P")
-                    .longOpt("pdf")
+                    .longOpt("make-pdf")
                     .desc("Generate PDF file")
                     .build();
 
