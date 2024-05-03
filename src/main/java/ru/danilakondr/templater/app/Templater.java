@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,6 +96,10 @@ public class Templater {
 
 	public void loadMacrosFromMap(Map<String, String> macros) {
 		stringMacros.loadFromMap(macros);
+	}
+
+	public void loadMacrosFromMap(Properties props) {
+		stringMacros.loadFromMap(props);
 	}
 
 	public void setVerbose(boolean verbose) {
