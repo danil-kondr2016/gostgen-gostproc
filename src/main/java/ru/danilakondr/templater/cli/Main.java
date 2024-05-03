@@ -1,6 +1,9 @@
-package ru.danilakondr.templater.app;
+package ru.danilakondr.templater.cli;
 
 import com.sun.star.uno.XComponentContext;
+import ru.danilakondr.templater.LibreOffice;
+import ru.danilakondr.templater.LibreOfficeException;
+import ru.danilakondr.templater.Templater;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

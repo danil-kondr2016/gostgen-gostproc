@@ -1,4 +1,4 @@
-package ru.danilakondr.templater.app;
+package ru.danilakondr.templater;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;

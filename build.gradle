@@ -27,7 +27,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'ru.danilakondr.templater.app.Main'
+    mainClass = 'ru.danilakondr.templater.cli.Main'
 }
 
 run {
@@ -84,7 +84,7 @@ tasks.register('findLibreOffice', Copy) {
             }
         } else if (platform.startsWith("mac os x")) {
             var resJava = java.nio.file.Path.of(
-                    "Applications", "LibreOffice.app",
+                    "Applications", "LibreOffice.cli",
                     "Contents", "Resources", "java"
             ).toFile()
 

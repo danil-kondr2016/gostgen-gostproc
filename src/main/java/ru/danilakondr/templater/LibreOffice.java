@@ -1,4 +1,4 @@
-package ru.danilakondr.templater.app;
+package ru.danilakondr.templater;
 
 import com.sun.star.uno.XComponentContext;
 import ooo.connector.BootstrapSocketConnector;
@@ -122,7 +122,7 @@ public class LibreOffice {
     }
 
     private static String findLibreOfficeInMacOS() throws LibreOfficeException, IOException {
-        File app = new File("/Applications/LibreOffice.app/Contents/MacOS");
+        File app = new File("/Applications/LibreOffice.cli/Contents/MacOS");
         if (!app.exists())
             throw new LibreOfficeException("LibreOffice not found");
 

@@ -1,6 +1,5 @@
-package ru.danilakondr.templater.app;
+package ru.danilakondr.templater.cli;
 
-import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.commons.cli.*;
