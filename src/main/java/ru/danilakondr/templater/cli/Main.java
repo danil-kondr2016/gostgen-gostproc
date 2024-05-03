@@ -8,17 +8,34 @@ import ru.danilakondr.templater.Templater;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import ru.danilakondr.templater.BuildVersion;
+
 public class Main {
     private static void checkHelp(String[] args) {
         for (String arg : args) {
             if (arg.equals("-h") || arg.equals("--help")) {
+                printVersion();
                 CommandLineArgs.Parser.printHelp();
                 System.exit(0);
             }
         }
     }
 
+    private static void checkVersion(String[] args) {
+        for (String arg : args) {
+            if (arg.equals("--version")) {
+                printVersion();
+                System.exit(0);
+            }
+        }
+    }
+
+    private static void printVersion() {
+        System.out.printf("UNO Templater %s%n", BuildVersion.getVersion());
+    }
+
     public static void main(String[] args) {
+        checkVersion(args);
         checkHelp(args);
 
         CommandLineArgs templaterArgs = null;

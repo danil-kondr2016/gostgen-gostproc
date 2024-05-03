@@ -102,6 +102,7 @@ public class CommandLineArgs {
         private static final Option OPTION_MACRO_DEF;
         private static final Option OPTION_VERBOSE;
         private static final Option OPTION_SHOW_HELP;
+        private static final Option OPTION_VERSION;
         private static final Options opts;
 
         static {
@@ -166,6 +167,11 @@ public class CommandLineArgs {
                     .desc("Print help message")
                     .build();
 
+            OPTION_VERSION = Option.builder()
+                    .longOpt("version")
+                    .desc("Show version of program")
+                    .build();
+
             opts = new Options()
                     .addOption(OPTION_TEMPLATE)
                     .addOption(OPTION_MAIN_TEXT)
@@ -177,6 +183,7 @@ public class CommandLineArgs {
                     .addOption(OPTION_MACRO_DEF)
                     .addOption(OPTION_VERBOSE)
                     .addOption(OPTION_SHOW_HELP)
+                    .addOption(OPTION_VERSION)
                     ;
         }
 
