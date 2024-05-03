@@ -46,7 +46,19 @@ public class StringMacros implements StringLookup {
         if (map == null)
             return;
 
-        map.forEach(this.props::setProperty);
+        this.props.putAll(map);
+    }
+
+    /**
+     * Загружает строковые макросы из Properies.
+     *
+     * @param props объект Properties
+     */
+    public void loadFromMap(Properties props) {
+        if (props == null)
+            return;
+
+        this.props.putAll(props);
     }
 
     @Override
