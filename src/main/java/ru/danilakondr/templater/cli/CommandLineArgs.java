@@ -174,6 +174,8 @@ public class CommandLineArgs {
             OPTION_MACRO_DEF = Option.builder("D")
                     .hasArgs()
                     .valueSeparator()
+                    .desc("Specify macro")
+                    .argName("KEY=VALUE")
                     .build();
 
             OPTION_VERBOSE = Option.builder("v")
